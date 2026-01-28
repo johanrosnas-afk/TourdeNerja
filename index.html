@@ -1902,6 +1902,14 @@ h1{
     await renderPublicStats();
     setPublicStatsTab('lag');
   })();
+
+  window.addEventListener('storage', async (e) => {
+    if(e.key === KEY){
+      await renderScorebar();
+      await renderRoundsAndMatches();
+      await renderPublicStats();
+    }
+  });
   
 })();
 </script>
