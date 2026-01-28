@@ -812,12 +812,24 @@ const KEY = 'tdn_admin_state_v2';
     }
   }
 
-  function save(state){
+  async function save(state){
+    // Spara lokalt som backup (valfritt men tryggt)
     localStorage.setItem(KEY, JSON.stringify(state));
+
+    const { error } = await sb
+      .from('app_state')
+      .upsert({
+        id: 'main',
+        data: state,
+        updated_at: new Date().toISOString()
+      });
+
+    if(error){
+      alert('Kunde inte spara till molnet');
+      console.error(error);
+    }
   }
-
   
-
   function sanitizeState(state){
     state = state && typeof state === 'object' ? state : {teams:[], players:[], rounds:[], matches:[]};
     state.players = Array.isArray(state.players) ? state.players : [];
