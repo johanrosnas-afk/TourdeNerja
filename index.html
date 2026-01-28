@@ -623,6 +623,11 @@ h1{
 </main>
 
 <script>
+  const SUPABASE_URL = "DIN_PROJECT_URL";
+  const SUPABASE_KEY = "DIN_ANON_PUBLIC_KEY";
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
 (function(){
   const KEY = 'tdn_admin_state_v2';
 
