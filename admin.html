@@ -400,6 +400,19 @@ input[type="color"]{
 </head>
 
 <body>
+<script>
+  const PASSWORD = "tdn26!";
+  if (sessionStorage.getItem("admin_ok") !== "1") {
+    const input = prompt("Admin-lösenord:");
+    if (input === PASSWORD) {
+      sessionStorage.setItem("admin_ok", "1");
+    } else {
+      document.body.innerHTML = "";
+      alert("Fel lösenord");
+      throw new Error("Unauthorized");
+    }
+  }
+</script>
 <header>
   <div class="top">
     <a class="brand" href="index.html"><img class="logo" src="tour-de-nerja-logo.png" alt=""></a>
