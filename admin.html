@@ -407,6 +407,11 @@ input[type="color"]{
 
 <body>
 <script>
+  const SUPABASE_URL = "DIN_PROJECT_URL";
+  const SUPABASE_KEY = "DIN_ANON_PUBLIC_KEY";
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
   const PASSWORD = "tdn26!";
   if (sessionStorage.getItem("admin_ok") !== "1") {
     const input = prompt("Admin-lösenord:");
