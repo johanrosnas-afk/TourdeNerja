@@ -623,8 +623,8 @@ h1{
 </main>
 
 <script>
-  const SUPABASE_URL = "DIN_PROJECT_URL";
-  const SUPABASE_KEY = "DIN_ANON_PUBLIC_KEY";
+  const SUPABASE_URL = "https://bedouordcrbaucvlnwkw.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZG91b3JkY3JiYXVjdmxud2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MzExMzMsImV4cCI6MjA4NTIwNzEzM30.mv9BVpT5NR0zsY5U5uRLADpDZZxDNZk1e8La1UzzQmU";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   
 (function(){
@@ -637,11 +637,21 @@ h1{
     el.innerHTML = `<div class="empty">${text}</div>`;
   }
 
-  function loadState(){
+  async function loadState(){
     try{
-      const raw = localStorage.getItem(KEY);
-      if(!raw) return {teams:[], players:[], rounds:[], matches:[]};
-      const d = JSON.parse(raw);
+      const { data, error } = await sb
+        .from('app_state')
+        .select('data')
+        .eq('id', 'main')
+        .single();
+
+      if(error || !data || !data.data){
+        // Om inget finns i molnet än: returnera tomt state
+        return {teams:[], players:[], rounds:[], matches:[]};
+      }
+
+      const d = data.data;
+
       return sanitizeState({
         teams: Array.isArray(d.teams) ? d.teams : [],
         players: Array.isArray(d.players) ? d.players : [],
@@ -917,8 +927,8 @@ h1{
     }
   }
 
-  function renderScorebar(){
-    const state = loadState();
+  async function renderScorebar(){
+    const state = await loadState();
     const t = computeTeamPoints(state);
 
     const aName = document.getElementById('teamAName');
@@ -1126,8 +1136,8 @@ h1{
     return bar;
   }
 
-  function renderRoundsAndMatches(){
-    const state = loadState();
+  async function renderRoundsAndMatches(){
+    const state = await loadState();
 
     const tabs = document.getElementById('roundTabs');
     const sub  = document.getElementById('matchesSub');
@@ -1157,25 +1167,25 @@ h1{
       btn.textContent = `Runda ${i+1}`;
       btn.setAttribute('aria-pressed', (r.id === selected) ? 'true' : 'false');
       btn.title = roundLabel(i, r);
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         tabs.setAttribute('data-selected', r.id);
-        renderRoundsAndMatches();
+        await renderRoundsAndMatches();
       });
       tabs.appendChild(btn);
     });
-
+  
     const roundIndex = rounds.findIndex(r => r.id === selected);
     const selectedRound = rounds[roundIndex];
     const ms = matchesForRound(state, selected);
-
+  
     sub.textContent = `${roundLabel(roundIndex, selectedRound)} • ${ms.length} matcher`;
-
+  
     list.innerHTML = '';
     if(ms.length === 0){
       setEmpty(list, 'Inga matcher i denna rond ännu.');
       return;
     }
-
+  
     ms.forEach(m => list.appendChild(buildMatchBar(state, m)));
   }
 
@@ -1876,8 +1886,8 @@ h1{
   if(statsTabLag) statsTabLag.addEventListener('click', () => setPublicStatsTab('lag'));
   if(statsTabPlayer) statsTabPlayer.addEventListener('click', () => setPublicStatsTab('player'));
 
-  function renderPublicStats(){
-    const state = loadState();
+  async function renderPublicStats(){
+    const state = await loadState();
     renderLagStats(state);
     renderPlayerStats(state);
     enableStatTableSorting();
@@ -1886,18 +1896,13 @@ h1{
   // =========================
   // BOOT
   // =========================
-  renderScorebar();
-  renderRoundsAndMatches();
-  renderPublicStats();
-  setPublicStatsTab('lag');
-
-  window.addEventListener('storage', (e) => {
-    if(e.key === KEY){
-      renderScorebar();
-      renderRoundsAndMatches();
-      renderPublicStats();
-    }
-  });
+  (async function boot(){
+    await renderScorebar();
+    await renderRoundsAndMatches();
+    await renderPublicStats();
+    setPublicStatsTab('lag');
+  })();
+  
 })();
 </script>
 </body>
