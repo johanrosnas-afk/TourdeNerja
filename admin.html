@@ -409,20 +409,28 @@ input[type="color"]{
 <script>
   const SUPABASE_URL = "DIN_PROJECT_URL";
   const SUPABASE_KEY = "DIN_ANON_PUBLIC_KEY";
-
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  
-  const PASSWORD = "tdn26!";
-  if (sessionStorage.getItem("admin_ok") !== "1") {
-    const input = prompt("Admin-lösenord:");
-    if (input === PASSWORD) {
-      sessionStorage.setItem("admin_ok", "1");
-    } else {
-      document.body.innerHTML = "";
-      alert("Fel lösenord");
-      throw new Error("Unauthorized");
+
+  // --- ADMIN LOGIN ---
+  async function adminLogin() {
+    const email = prompt("Admin e-post:");
+    const password = prompt("Lösenord:");
+
+    const { data, error } = await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert("Fel inloggning");
+      throw error;
     }
+
+    console.log("Inloggad som admin");
   }
+
+  adminLogin();
+
 </script>
 <header>
   <div class="top">
