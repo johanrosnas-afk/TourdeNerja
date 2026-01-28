@@ -7,9 +7,6 @@
 
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Din app -->
-  <script src="script.js?v=3" defer></script>
   
 <style>
 :root{
@@ -1899,14 +1896,6 @@ h1{
     await renderPublicStats();
     setPublicStatsTab('lag');
   })();
-
-  window.addEventListener('storage', async (e) => {
-    if(e.key === KEY){
-      await renderScorebar();
-      await renderRoundsAndMatches();
-      await renderPublicStats();
-    }
-  });
   
 })();
 </script>
