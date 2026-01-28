@@ -429,7 +429,11 @@ input[type="color"]{
     console.log("Inloggad som admin");
   }
 
-  adminLogin();
+  sb.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      adminLogin();
+    }
+  });
 
 </script>
 <header>
