@@ -406,36 +406,7 @@ input[type="color"]{
 </head>
 
 <body>
-<script>
-  const SUPABASE_URL = "DIN_PROJECT_URL";
-  const SUPABASE_KEY = "DIN_ANON_PUBLIC_KEY";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // --- ADMIN LOGIN ---
-  async function adminLogin() {
-    const email = prompt("Admin e-post:");
-    const password = prompt("Lösenord:");
-
-    const { data, error } = await sb.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      alert("Fel inloggning");
-      throw error;
-    }
-
-    console.log("Inloggad som admin");
-  }
-
-  sb.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      adminLogin();
-    }
-  });
-
-</script>
 <header>
   <div class="top">
     <a class="brand" href="index.html"><img class="logo" src="tour-de-nerja-logo.png" alt=""></a>
@@ -720,6 +691,34 @@ input[type="color"]{
 </div>
 
 <script>
+  const SUPABASE_URL = "DIN_PROJECT_URL";
+  const SUPABASE_KEY = "DIN_ANON_PUBLIC_KEY";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // --- ADMIN LOGIN ---
+  async function adminLogin() {
+    const email = prompt("Admin e-post:");
+    const password = prompt("Lösenord:");
+
+    const { data, error } = await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert("Fel inloggning");
+      throw error;
+    }
+
+    console.log("Inloggad som admin");
+  }
+
+  sb.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      adminLogin();
+    }
+  });
+  
 (function(){
 const KEY = 'tdn_admin_state_v2';
 
