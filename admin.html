@@ -436,6 +436,35 @@ input[type="color"]{
     })();
   </script>
 
+  <script>
+    // ✅ Logout kopplas tidigt så den funkar även om stora scriptet kraschar
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('logoutBtn');
+      if(!btn) return;
+  
+      btn.addEventListener('click', async () => {
+        try{
+          console.log('LOGOUT CLICK');
+          const { error } = await sb.auth.signOut();
+          if(error){
+            console.error('Logout error:', error);
+            alert('Kunde inte logga ut (se Console).');
+            return;
+          }
+  
+          // valfritt: rensa lokal backup
+          localStorage.removeItem('tdn_admin_state_v2');
+  
+          // tillbaka till startsidan
+          location.href = 'index.html';
+        }catch(e){
+          console.error('Logout crash:', e);
+          alert('Logout kraschade (se Console).');
+        }
+      });
+    });
+  </script>
+  
 <header>
   <div class="top">
     <a class="brand" href="index.html"><img class="logo" src="tour-de-nerja-logo.png" alt=""></a>
@@ -444,8 +473,9 @@ input[type="color"]{
       <a href="index.html#tourdenerja">Tour de Nerja</a>
       <a href="index.html#statistik">Statistik</a>
       <a class="is-active" href="admin.html">Admin</a>
-      <button class="btn" id="logoutBtn" type="button">Logga ut</button>
     </nav>
+
+    <button class="btn" id="logoutBtn" type="button">Logga ut</button>
   </div>
 </header>
 
