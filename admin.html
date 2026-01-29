@@ -2936,6 +2936,16 @@ input[type="color"]{
   (async () => {
     const initial = await loadFromCloudOrLocal();
     render(initial);
+
+    // ⬇⬇⬇ LOGOUT-KODEN – EXAKT HÄR ⬇⬇⬇
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        await sb.auth.signOut();
+        sessionStorage.clear();
+        location.reload();
+      });
+    }
   })();
 
 })();
