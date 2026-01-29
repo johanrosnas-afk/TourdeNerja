@@ -400,40 +400,56 @@ input[type="color"]{
 </head>
 
 <body>
-  <!-- Auth + Supabase client (måste ligga före huvudscriptet) -->
   <script>
     console.log("ADMIN SCRIPT LOADED");
-
+  
     // Supabase init
     const SUPABASE_URL = "https://bedouordcrbaucvlnwkw.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZG91b3JkY3JiYXVjdmxud2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MzExMzMsImV4cCI6MjA4NTIwNzEzM30.mv9BVpT5NR0zsY5U5uRLADpDZZxDNZk1e8La1UzzQmU";
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // En "gate" så resten av koden kan vänta på att du är inloggad
-    window.__tdnAuthReady = (async () => {
-      // Admin login-funktion
-      async function adminLogin() {
-        const email = prompt("Admin e-post:");
-        const password = prompt("Lösenord:");
-        const { error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) {
-          alert("Fel inloggning");
-          throw error;
-        }
+  
+    // Admin login-funktion (används när DU vill logga in)
+    async function adminLogin() {
+      const email = prompt("Admin e-post:");
+      const password = prompt("Lösenord:");
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert("Fel inloggning");
+        throw error;
       }
-
+    }
+  
+    // ✅ Gate: om inte inloggad på admin -> kasta till index (ingen prompt!)
+    window.__tdnAuthReady = (async () => {
       const { data } = await sb.auth.getSession();
       console.log("SESSION:", data.session);
-
+  
       if (!data.session) {
-        await adminLogin();
+        window.location.replace("index.html");
+        return false;
       }
-
-      // dubbelkolla efter inloggning
-      const after = await sb.auth.getSession();
-      if (!after.data.session) throw new Error("Ingen session efter inloggning.");
+  
       return true;
     })();
+  
+    // ✅ Vid utloggning: kasta till index direkt
+    sb.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        window.location.replace("index.html");
+      }
+    });
+  
+    // ✅ Exponera en logout-funktion som din knapp kan anropa
+    window.tdnLogout = async function () {
+      await sb.auth.signOut(); // redirect sköts av onAuthStateChange ovan
+    };
+  
+    // ✅ (Valfritt) Exponera login om du vill ha en "Logga in"-knapp på admin
+    window.tdnLogin = async function () {
+      await adminLogin();
+      // efter lyckad login kan du ladda om admin
+      window.location.reload();
+    };
   </script>
 
   <script>
