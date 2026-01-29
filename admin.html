@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tour de Nerja – Admin</title>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -400,6 +400,7 @@ input[type="color"]{
 </head>
 
 <body>
+  <!-- Auth + Supabase client (måste ligga före huvudscriptet) -->
   <script>
     console.log("ADMIN SCRIPT LOADED");
 
@@ -408,30 +409,33 @@ input[type="color"]{
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZG91b3JkY3JiYXVjdmxud2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MzExMzMsImV4cCI6MjA4NTIwNzEzM30.mv9BVpT5NR0zsY5U5uRLADpDZZxDNZk1e8La1UzzQmU";
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Admin login-funktion
-    async function adminLogin() {
-      const email = prompt("Admin e-post:");
-      const password = prompt("Lösenord:");
-
-      const { error } = await sb.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        alert("Fel inloggning");
-        throw error;
+    // En "gate" så resten av koden kan vänta på att du är inloggad
+    window.__tdnAuthReady = (async () => {
+      // Admin login-funktion
+      async function adminLogin() {
+        const email = prompt("Admin e-post:");
+        const password = prompt("Lösenord:");
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+          alert("Fel inloggning");
+          throw error;
+        }
       }
-    }
 
-    // Session-check (DET DU FRÅGADE OM)
-    sb.auth.getSession().then(({ data }) => {
+      const { data } = await sb.auth.getSession();
       console.log("SESSION:", data.session);
+
       if (!data.session) {
-        adminLogin();
+        await adminLogin();
       }
-    });
+
+      // dubbelkolla efter inloggning
+      const after = await sb.auth.getSession();
+      if (!after.data.session) throw new Error("Ingen session efter inloggning.");
+      return true;
+    })();
   </script>
+
 <header>
   <div class="top">
     <a class="brand" href="index.html"><img class="logo" src="tour-de-nerja-logo.png" alt=""></a>
@@ -441,7 +445,7 @@ input[type="color"]{
       <a href="index.html#statistik">Statistik</a>
       <a class="is-active" href="admin.html">Admin</a>
     </nav>
-</div>
+  </div>
 </header>
 
 <main class="wrap">
@@ -524,7 +528,7 @@ input[type="color"]{
               <th title="Birdies">B</th>
               <th title="Eagles">E</th>
               <th title="Albatross">A</th>
-              <th title="Hole in One">HIO</th>             
+              <th title="Hole in One">HIO</th>
               <th title="Närmast flagg">NF</th>
               <th title="Längsta drive">LD</th>
               <th title="Poäng">P</th>
@@ -717,7 +721,8 @@ input[type="color"]{
 
 <script>
 (function(){
-const KEY = 'tdn_admin_state_v2';
+  // ✅ Samma KEY som i index.html
+  const KEY = 'tdn_state_v2';
 
   // DOM
   const teamList = document.getElementById('teamList');
@@ -793,43 +798,15 @@ const KEY = 'tdn_admin_state_v2';
     return Math.random().toString(16).slice(2) + Date.now().toString(16);
   }
 
-  function load(){
-    try{
-      const raw = localStorage.getItem(KEY);
-      if(!raw) return {teams:[], players:[], rounds:[], matches:[]};
-      const d = JSON.parse(raw);
-      if(!d || typeof d !== 'object') return {teams:[], players:[], rounds:[], matches:[]};
-      d.teams = Array.isArray(d.teams) ? d.teams : [];
-      d.players = Array.isArray(d.players) ? d.players : [];
-      d.rounds = Array.isArray(d.rounds) ? d.rounds : [];
-      d.matches = Array.isArray(d.matches) ? d.matches : [];
-      return d;
-    }catch(e){
-      return {teams:[], players:[], rounds:[], matches:[]};
-    }
+  function emptyState(){
+    return {teams:[], players:[], rounds:[], matches:[]};
   }
 
-  async function save(state){
-    // Spara lokalt som backup (valfritt men tryggt)
-    localStorage.setItem(KEY, JSON.stringify(state));
-
-    const { error } = await sb
-      .from('app_state')
-      .upsert({
-        id: 'main',
-        data: state,
-        updated_at: new Date().toISOString()
-      });
-
-    if(error){
-      alert('Kunde inte spara till molnet');
-      console.error(error);
-    }
-  }
-  
   function sanitizeState(state){
-    state = state && typeof state === 'object' ? state : {teams:[], players:[], rounds:[], matches:[]};
+    state = state && typeof state === 'object' ? state : emptyState();
+    state.teams = Array.isArray(state.teams) ? state.teams : [];
     state.players = Array.isArray(state.players) ? state.players : [];
+    state.rounds = Array.isArray(state.rounds) ? state.rounds : [];
     state.matches = Array.isArray(state.matches) ? state.matches : [];
 
     const valid = new Set(state.players.map(p => p && p.id).filter(Boolean));
@@ -853,12 +830,76 @@ const KEY = 'tdn_admin_state_v2';
         m.holes = Array(18).fill(null);
         delete m.book;
       }
+
+      if(!Array.isArray(m.holes) || m.holes.length !== 18) m.holes = Array(18).fill(null);
     });
 
     return state;
   }
 
-function openModal(el){
+  function loadLocal(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return emptyState();
+      return sanitizeState(JSON.parse(raw));
+    }catch(e){
+      return emptyState();
+    }
+  }
+
+  async function loadFromCloudOrLocal(){
+    try{
+      // vänta på inloggning/session
+      if(window.__tdnAuthReady) await window.__tdnAuthReady;
+
+      const { data, error } = await sb
+        .from('app_state')
+        .select('data')
+        .eq('id', 'main')
+        .single();
+
+      if(!error && data && data.data){
+        const clean = sanitizeState(data.data);
+        localStorage.setItem(KEY, JSON.stringify(clean));
+        return clean;
+      }
+    }catch(e){
+      // tyst fallback till local
+      console.warn('Cloud load failed, fallback local:', e);
+    }
+
+    return loadLocal();
+  }
+
+  async function save(state){
+    const clean = sanitizeState(state);
+
+    // lokal backup
+    localStorage.setItem(KEY, JSON.stringify(clean));
+
+    // cloud
+    try{
+      if(window.__tdnAuthReady) await window.__tdnAuthReady;
+
+      const { error } = await sb
+        .from('app_state')
+        .upsert({
+          id: 'main',
+          data: clean,
+          updated_at: new Date().toISOString()
+        });
+
+      if(error){
+        alert('Kunde inte spara till molnet');
+        console.error(error);
+      }
+    }catch(e){
+      alert('Kunde inte spara till molnet');
+      console.error(e);
+    }
+  }
+
+  function openModal(el){
     el.classList.add('is-open');
     el.setAttribute('aria-hidden','false');
   }
@@ -925,9 +966,7 @@ function openModal(el){
     return (L > 0.52) ? '#000' : '#fff';
   }
 
-  function formatDate(iso){
-    return iso || '';
-  }
+  function formatDate(iso){ return iso || ''; }
 
   function isTeamOpen(id){
     return (expandedTeams[id] !== undefined) ? !!expandedTeams[id] : true;
@@ -943,7 +982,6 @@ function openModal(el){
   }
 
   function syncToggleButtons(state){
-    // Teams
     const tTeams = document.getElementById('toggleAllTeamsBtn');
     const teams = Array.isArray(state?.teams) ? state.teams : [];
     if(tTeams){
@@ -962,7 +1000,6 @@ function openModal(el){
       }
     }
 
-    // Rounds
     const tRounds = document.getElementById('toggleAllRoundsBtn');
     const rounds = Array.isArray(state?.rounds) ? state.rounds : [];
     if(tRounds){
@@ -983,12 +1020,10 @@ function openModal(el){
   }
 
   function sortTeamsAndPlayers2Lag(state){
-    // Teams: keep order as stored (A/B stable)
     state.teams = Array.isArray(state.teams) ? state.teams : [];
     const idx = {};
     state.teams.forEach((t,i) => idx[t.id] = i);
 
-    // Players: team order -> captain first -> name
     state.players = Array.isArray(state.players) ? state.players.slice() : [];
     state.players.sort((a,b) => {
       const ia = (a.teamId in idx) ? idx[a.teamId] : 999;
@@ -1182,28 +1217,28 @@ function openModal(el){
       B.L++;
 
       if(matchType === 'Par'){
-        A.W++;              // ✅ Parmatchvinst (PV)
+        A.W++;              // PV
         A.P += 1;
       }else if(matchType === 'Singel'){
-        A.S = (A.S || 0) + 1; // ✅ Singelmatchvinst (SV)
+        A.S = (A.S || 0) + 1; // SV
         A.P += 1;
       }
 
     }else if(winner === 'B'){
       A.L++;
-  
+
       if(matchType === 'Par'){
-        B.W++;              // ✅ Parmatchvinst (PV)
+        B.W++;              // PV
         B.P += 1;
       }else if(matchType === 'Singel'){
-        B.S = (B.S || 0) + 1; // ✅ Singelmatchvinst (SV)
+        B.S = (B.S || 0) + 1; // SV
         B.P += 1;
       }
 
     }else if(winner === 'D'){
-      A.D++; 
-      B.D++; 
-      A.P += 0.5; 
+      A.D++;
+      B.D++;
+      A.P += 0.5;
       B.P += 0.5;
 
     }else{
@@ -1213,15 +1248,16 @@ function openModal(el){
     // +/- endast vid avgjord match
     if((winner === 'A' || winner === 'B') && wonOnHole >= 1 && wonOnHole <= 18){
       const delta = 19 - wonOnHole;
-      if(winner === 'A'){ 
-        A.PM += delta; 
-        B.PM -= delta; 
-      }else{ 
-        B.PM += delta; 
-        A.PM -= delta; 
+      if(winner === 'A'){
+        A.PM += delta;
+        B.PM -= delta;
+      }else{
+        B.PM += delta;
+        A.PM -= delta;
       }
     }
   }
+
   // ===== match dialog helpers =====
   function fillPlayerSelect(selectEl, players){
     selectEl.innerHTML = '';
@@ -1249,7 +1285,7 @@ function openModal(el){
   }
 
   function openAddMatchForRound(roundId){
-    const state = load();
+    const state = loadLocal();
     sortTeamsAndPlayers2Lag(state);
 
     editingMatchId = null;
@@ -1291,7 +1327,7 @@ function openModal(el){
   }
 
   function openEditMatch(matchId){
-    const state = load();
+    const state = loadLocal();
     sortTeamsAndPlayers2Lag(state);
 
     const m = state.matches.find(x => x.id === matchId);
@@ -1340,7 +1376,7 @@ function openModal(el){
   }
 
   function openBookMatch(matchId){
-    const state = load();
+    const state = loadLocal();
     sortTeamsAndPlayers2Lag(state);
 
     const m = state.matches.find(x => x.id === matchId);
@@ -1545,7 +1581,7 @@ function openModal(el){
 
   // ===== CRUD =====
   function openEditTeam(id){
-    const state = load();
+    const state = loadLocal();
     const t = state.teams.find(x => x.id === id);
     if(!t) return;
 
@@ -1558,7 +1594,7 @@ function openModal(el){
   }
 
   function openEditPlayer(id){
-    const state = load();
+    const state = loadLocal();
     const p = state.players.find(x => x.id === id);
     if(!p) return;
 
@@ -1570,7 +1606,7 @@ function openModal(el){
   }
 
   function openAddPlayerForTeam(teamId){
-    const state = load();
+    const state = loadLocal();
     const t = state.teams.find(x => x.id === teamId);
 
     addingPlayerTeamId = teamId || '';
@@ -1584,7 +1620,7 @@ function openModal(el){
   }
 
   function openEditRound(roundId){
-    const state = load();
+    const state = loadLocal();
     const r = state.rounds.find(x => x.id === roundId);
     if(!r) return;
 
@@ -1596,8 +1632,8 @@ function openModal(el){
     setTimeout(() => roundCourse.focus(), 0);
   }
 
-  function deleteTeam(id){
-    const state = load();
+  async function deleteTeam(id){
+    const state = loadLocal();
     const team = state.teams.find(t => t.id === id);
     if(!team) return;
     if(!confirm('Ta bort "' + team.name + '"?')) return;
@@ -1610,20 +1646,18 @@ function openModal(el){
       }
     });
 
-    save(state);
+    await save(state);
     render(state);
   }
 
-  function deletePlayer(id){
-    const state = load();
+  async function deletePlayer(id){
+    const state = loadLocal();
     const player = state.players.find(p => p.id === id);
     if(!player) return;
     if(!confirm('Ta bort "' + player.name + '"?')) return;
 
-    // 1) ta bort ur spelare
     state.players = state.players.filter(p => p.id !== id);
 
-    // 2) REN & STRIKT: rensa ur matcher + nolla trasiga matcher
     state.matches = Array.isArray(state.matches) ? state.matches : [];
     state.matches.forEach(m => {
       if(!m) return;
@@ -1645,14 +1679,13 @@ function openModal(el){
       }
     });
 
-    // 3) Sanera & SPARA (viktigt)
     const clean = sanitizeState(state);
-    save(clean);
+    await save(clean);
     render(clean);
   }
 
-  function deleteRound(roundId){
-    const state = load();
+  async function deleteRound(roundId){
+    const state = loadLocal();
     const r = state.rounds.find(x => x.id === roundId);
     if(!r) return;
 
@@ -1661,7 +1694,7 @@ function openModal(el){
 
     state.rounds = state.rounds.filter(x => x.id !== roundId);
     state.matches = (state.matches || []).filter(m => m.roundId !== roundId);
-    save(state);
+    await save(state);
     render(state);
   }
 
@@ -1688,8 +1721,8 @@ function openModal(el){
   // ===== EVENT WIRING =====
   matchType.addEventListener('change', updateMatchUI);
 
-  saveMatchBtn.addEventListener('click', () => {
-    const state = load();
+  saveMatchBtn.addEventListener('click', async () => {
+    const state = loadLocal();
     sortTeamsAndPlayers2Lag(state);
 
     state.matches = Array.isArray(state.matches) ? state.matches : [];
@@ -1726,14 +1759,14 @@ function openModal(el){
       });
     }
 
-    save(state);
+    await save(state);
     render(state);
     closeModal(matchModal);
     editingMatchId = null;
   });
 
   document.getElementById('addTeamBtn').addEventListener('click', () => {
-    const state = load();
+    const state = loadLocal();
     if((state.teams || []).length >= 2){
       alert('Max 2 lag. Ta bort ett lag om du vill byta.');
       return;
@@ -1758,7 +1791,7 @@ function openModal(el){
   const toggleAllTeamsBtn = document.getElementById('toggleAllTeamsBtn');
   if(toggleAllTeamsBtn){
     toggleAllTeamsBtn.addEventListener('click', () => {
-      const state = load();
+      const state = loadLocal();
       const mode = toggleAllTeamsBtn.dataset.mode || 'collapse';
       setAllTeamsOpen(state, mode === 'expand');
       render(state);
@@ -1768,18 +1801,18 @@ function openModal(el){
   const toggleAllRoundsBtn = document.getElementById('toggleAllRoundsBtn');
   if(toggleAllRoundsBtn){
     toggleAllRoundsBtn.addEventListener('click', () => {
-      const state = load();
+      const state = loadLocal();
       const mode = toggleAllRoundsBtn.dataset.mode || 'collapse';
       setAllRoundsOpen(state, mode === 'expand');
       render(state);
     });
   }
 
-  saveTeamBtn.addEventListener('click', () => {
+  saveTeamBtn.addEventListener('click', async () => {
     const name = teamName.value.trim();
     if(!name) return;
 
-    const state = load();
+    const state = loadLocal();
     state.teams = Array.isArray(state.teams) ? state.teams : [];
 
     if(!editingTeamId && state.teams.length >= 2){
@@ -1798,16 +1831,16 @@ function openModal(el){
       state.teams.push({id:uid(), name, color});
     }
 
-    save(state);
+    await save(state);
     render(state);
     closeModal(teamModal);
   });
 
-  savePlayerBtn.addEventListener('click', () => {
+  savePlayerBtn.addEventListener('click', async () => {
     const name = playerName.value.trim();
     if(!name) return;
 
-    const state = load();
+    const state = loadLocal();
     state.players = Array.isArray(state.players) ? state.players : [];
 
     if(editingPlayerId){
@@ -1823,18 +1856,18 @@ function openModal(el){
       });
     }
 
-    save(state);
+    await save(state);
     render(state);
     closeModal(playerModal);
     addingPlayerTeamId = '';
   });
 
-  saveRoundBtn.addEventListener('click', () => {
+  saveRoundBtn.addEventListener('click', async () => {
     const date = (roundDate.value || '').trim();
     const course = roundCourse.value.trim();
     if(!date || !course) return;
 
-    const state = load();
+    const state = loadLocal();
     state.rounds = Array.isArray(state.rounds) ? state.rounds : [];
 
     if(editingRoundId){
@@ -1846,7 +1879,7 @@ function openModal(el){
       state.rounds.push({id:uid(), date, course});
     }
 
-    save(state);
+    await save(state);
     render(state);
     closeModal(roundModal);
   });
@@ -1854,7 +1887,6 @@ function openModal(el){
   function collectBookDataIntoMatch(m){
     m.book = m.book || {};
 
-    // per player stats
     const byPlayer = {};
     const holders = bookPlayersList.querySelectorAll('[data-player]');
     holders.forEach(h => {
@@ -1885,7 +1917,6 @@ function openModal(el){
 
     m.book.byPlayer = byPlayer;
 
-    // holes + derive winner/decided
     if(Array.isArray(bookingHolesDraft) && bookingHolesDraft.length === 18){
       m.holes = cloneHoles(bookingHolesDraft);
 
@@ -1901,34 +1932,39 @@ function openModal(el){
           m.book.wonOnHole = '';
           m.book.resultUp = 0;
         }
+      }else{
+        m.book.winner = '';
+        m.book.wonOnHole = '';
+        m.book.resultUp = 0;
       }
     }
   }
 
-  saveBookBtn.addEventListener('click', () => {
-    const state = load();
+  saveBookBtn.addEventListener('click', async () => {
+    const state = loadLocal();
     const m = (state.matches || []).find(x => x.id === bookingMatchId);
     if(!m || m.isClosed) return;
 
     collectBookDataIntoMatch(m);
-    save(state);
+    await save(state);
     render(state);
     closeModal(bookModal);
   });
 
-  closeMatchBtn.addEventListener('click', () => {
-    const state = load();
+  closeMatchBtn.addEventListener('click', async () => {
+    const state = loadLocal();
     const m = (state.matches || []).find(x => x.id === bookingMatchId);
     if(!m || m.isClosed) return;
 
     collectBookDataIntoMatch(m);
     m.isClosed = true;
 
-    save(state);
+    await save(state);
     render(state);
     closeModal(bookModal);
   });
-// ===== Tabs =====
+
+  // ===== Tabs =====
   const tPlayers = document.getElementById('tab-players');
   const tComp = document.getElementById('tab-competition');
   const pPlayers = document.getElementById('panel-players');
@@ -1967,13 +2003,7 @@ function openModal(el){
 
     const ts = {};
     teams.forEach(t => ts[t.id] = {
-            SM:0,  // Spelade matcher
-      W:0,   // PV
-      S:0,   // SV
-      L:0,
-      D:0,
-      PM:0,
-      P:0
+      SM:0, W:0, S:0, L:0, D:0, PM:0, P:0
     });
 
     if(!teamA || !teamB) return { teams, ts, leadingTeamId: '' };
@@ -1993,7 +2023,6 @@ function openModal(el){
     });
 
     let leadingTeamId = '';
-
     if(A.P > B.P){
       leadingTeamId = teamA.id;
     }else if(B.P > A.P){
@@ -2003,13 +2032,11 @@ function openModal(el){
     }else if(B.PM > A.PM){
       leadingTeamId = teamB.id;
     }else{
-      // 🔹 NY TIEBREAK: flest vunna singelmatcher
       const aSingles = (A.S || 0);
       const bSingles = (B.S || 0);
-
       if(aSingles > bSingles) leadingTeamId = teamA.id;
       else if(bSingles > aSingles) leadingTeamId = teamB.id;
-      else leadingTeamId = ''; // helt lika
+      else leadingTeamId = '';
     }
 
     return { teams, ts, leadingTeamId };
@@ -2052,15 +2079,15 @@ function openModal(el){
       tdName.appendChild(name);
       tr.appendChild(tdName);
 
-      const s = ts[t.id] || {W:0,L:0,D:0,PM:0,P:0};
+      const s = ts[t.id] || {SM:0,W:0,S:0,L:0,D:0,PM:0,P:0};
 
       const cells = [
-        s.SM || 0,   // SM
-        s.W,         // PV
-        s.S || 0,    // SV
-        s.D,         // D
-        s.L,         // F
-        s.PM,        // +/-
+        s.SM || 0,
+        s.W,
+        s.S || 0,
+        s.D,
+        s.L,
+        s.PM,
         fmtTeamPts(s.P)
       ];
       cells.forEach(v => {
@@ -2074,7 +2101,6 @@ function openModal(el){
   }
 
   function computeTeamTotalsForFF(state){
-    // same logic as team stats, but we only need the leading team id
     const { leadingTeamId } = computeTeamStats(state);
     return { leadingTeamId: leadingTeamId || '' };
   }
@@ -2110,26 +2136,20 @@ function openModal(el){
       const teamB = Array.isArray(m.teamB) ? m.teamB.filter(Boolean) : [];
       const playersInMatch = [...teamA, ...teamB];
 
-      // Spelade matcher
       playersInMatch.forEach(pid => {
         if(ps[pid]) ps[pid].SM += 1;
       });
 
-      // Matchpoäng + PV/SV/D
       if(winner === 'A' || winner === 'B'){
         const winners = (winner === 'A') ? teamA : teamB;
+        const losers  = (winner === 'A') ? teamB : teamA;
 
-      const losers = (winner === 'A') ? teamB : teamA;
-      losers.forEach(pid => {
-        if(ps[pid]) ps[pid].F += 1;
-      });
+        losers.forEach(pid => { if(ps[pid]) ps[pid].F += 1; });
 
         winners.forEach(pid => {
           if(!ps[pid]) return;
-
           if(m.type === 'Par') ps[pid].PV += 1;
           else ps[pid].SV += 1;
-
           ps[pid].P += value;
         });
 
@@ -2142,7 +2162,6 @@ function openModal(el){
         });
       }
 
-      // Prestationskolumner + prestationspoäng
       const byPlayer = (m.book && m.book.byPlayer && typeof m.book.byPlayer === 'object') ? m.book.byPlayer : {};
       playersInMatch.forEach(pid => {
         if(!ps[pid]) return;
@@ -2171,7 +2190,6 @@ function openModal(el){
       });
     });
 
-    // FF: -5 till spelare i ledande lag
     const leadingTeamId = computeTeamTotalsForFF(state).leadingTeamId;
     if(leadingTeamId){
       players.forEach(p => {
@@ -2179,22 +2197,20 @@ function openModal(el){
       });
     }
 
-    // FF: topp 3 i P får -3/-2/-1
     const ranked = players.slice().sort((a,b) => {
       const A = ps[a.id] || {};
       const B = ps[b.id] || {};
 
-      // Hämta värden (byt gärna till dina egna fältnamn om de heter annorlunda)
       const aP  = Number(A.P)  || 0;
       const bP  = Number(B.P)  || 0;
 
-      const aSV = Number(A.SV) || 0;  // singelvinster
+      const aSV = Number(A.SV) || 0;
       const bSV = Number(B.SV) || 0;
 
-      const aPV = Number(A.PV) || 0;  // parvinster
+      const aPV = Number(A.PV) || 0;
       const bPV = Number(B.PV) || 0;
 
-      const aD  = Number(A.D)  || 0;  // delade (behövs bara för "matcher spelade")
+      const aD  = Number(A.D)  || 0;
       const bD  = Number(B.D)  || 0;
 
       const aB  = Number(A.B)  || 0;
@@ -2203,36 +2219,26 @@ function openModal(el){
       const aE  = Number(A.E)  || 0;
       const bE  = Number(B.E)  || 0;
 
-      const aAl = Number(A.A)  || 0;      // albatross
+      const aAl = Number(A.A)  || 0;
       const bAl = Number(B.A)  || 0;
 
       const aH  = Number(A.HIO)|| 0;
       const bH  = Number(B.HIO)|| 0;
 
-      // dir: -1 = högst först (som i din nuvarande sort)
       const dir = -1;
 
-      // 1. Poäng
       if(bP !== aP) return dir * (aP - bP);
-
-      // 2. Singelvinster
       if(bSV !== aSV) return dir * (aSV - bSV);
-
-      // 3. Parvinster
       if(bPV !== aPV) return dir * (aPV - bPV);
-
-      // 4. Prestationer
       if(bAl !== aAl) return dir * (aAl - bAl);
       if(bH  !== aH)  return dir * (aH  - bH);
       if(bE  !== aE)  return dir * (aE  - bE);
       if(bB  !== aB)  return dir * (aB  - bB);
 
-      // 5. Färre matcher spelade
       const aM = aPV + aSV + aD;
       const bM = bPV + bSV + bD;
-      if(aM !== bM) return aM - bM; // färre först
+      if(aM !== bM) return aM - bM;
 
-      // 6. Namn
       return (a.name||'').localeCompare(b.name||'', 'sv');
     });
 
@@ -2281,19 +2287,19 @@ function openModal(el){
       const s = ps[p.id] || { SM:0, PV:0, SV:0, F:0, D:0, B:0, E:0, A:0, HIO:0, NF:0, LD:0, P:0, FF:0 };
 
       const cols = [
-        s.SM,       // SM
-        s.PV,       // PV
-        s.SV,       // SV
-        s.D,        // D
-        s.F,        // F
-        s.B,        // B
-        s.E,        // E
-        s.A,        // A
-        s.HIO,      // HIO
-        s.NF,       // NF
-        s.LD,       // LD
-        fmtPts(s.P),// P
-        s.FF        // FF
+        s.SM,
+        s.PV,
+        s.SV,
+        s.D,
+        s.F,
+        s.B,
+        s.E,
+        s.A,
+        s.HIO,
+        s.NF,
+        s.LD,
+        fmtPts(s.P),
+        s.FF
       ];
       cols.forEach(v => {
         const td = document.createElement('td');
@@ -2317,31 +2323,21 @@ function openModal(el){
 
     const locale = opts.locale || 'sv';
     const tiebreakOnP = !!opts.tiebreakOnP;
-    const mode = opts.mode || 'generic'; // 'team' | 'player' | 'generic'
-    const idx = opts.idx || {};          // column index map
+    const mode = opts.mode || 'generic';
+    const idx = opts.idx || {};
 
     function getCellText(tr, i){
       return tr.children[i]?.textContent.trim() || '';
     }
-
     function numFromCell(tr, i){
       const s = getCellText(tr, i).replace(/\s/g,'').replace(',', '.');
       const n = Number(s);
       return isNaN(n) ? 0 : n;
     }
+    function nameFromRow(tr){ return getCellText(tr, 0); }
+    function cmpLocale(a,b){ return a.localeCompare(b, locale); }
 
-    function nameFromRow(tr){
-      // first col is name
-      return getCellText(tr, 0);
-    }
-
-    function cmpLocale(a,b){
-      return a.localeCompare(b, locale);
-    }
-
-    // --- TIEBREAK COMPARATORS WHEN SORTING BY P ---
     function cmpTeamByP(a, b, dir){
-      // dir: -1 => desc (default), 1 => asc
       const aP  = numFromCell(a, idx.P);
       const bP  = numFromCell(b, idx.P);
       if(aP !== bP) return dir * (aP - bP);
@@ -2354,7 +2350,6 @@ function openModal(el){
       const bSV = numFromCell(b, idx.SV);
       if(aSV !== bSV) return dir * (aSV - bSV);
 
-      // extra stabilitet (valfritt men bra)
       const aPV = numFromCell(a, idx.PV);
       const bPV = numFromCell(b, idx.PV);
       if(aPV !== bPV) return dir * (aPV - bPV);
@@ -2391,7 +2386,6 @@ function openModal(el){
       const bB  = numFromCell(b, idx.B);
       if(aB !== bB) return dir * (aB - bB);
 
-      // färre matcher spelade (PV+SV+D) är bättre => invertera jämfört med dir
       const aM = numFromCell(a, idx.PV) + numFromCell(a, idx.SV) + numFromCell(a, idx.D);
       const bM = numFromCell(b, idx.PV) + numFromCell(b, idx.SV) + numFromCell(b, idx.D);
       if(aM !== bM) return (-dir) * (aM - bM);
@@ -2403,13 +2397,11 @@ function openModal(el){
       const rows = Array.from(tbody.querySelectorAll('tr'));
 
       rows.sort((a,b) => {
-        // Special: Om vi sorterar på P och vill ha tiebreak
         if(tiebreakOnP && i === idx.P){
           if(mode === 'team')   return cmpTeamByP(a,b,dir);
           if(mode === 'player') return cmpPlayerByP(a,b,dir);
         }
 
-        // annars: vanlig sort
         const av = getCellText(a, i);
         const bv = getCellText(b, i);
 
@@ -2439,7 +2431,6 @@ function openModal(el){
   }
 
   function enableStatTableSorting(){
-    // LAG: Lag, PV, SV, F, D, +/-, P
     const lagTable = document.querySelector('#lagStatsBlock table');
     makeTableSortable(lagTable, 7, {
       tiebreakOnP: true,
@@ -2447,39 +2438,32 @@ function openModal(el){
       idx: { SM:1, PV:2, SV:3, P:7, PM:6 }
     });
 
-    // SPELARE: Spelare, PV, SV, D, B, E, A, HIO, NF, LD, P, FF
     const playerTable = document.querySelector('#playerStatsBlock table');
     makeTableSortable(playerTable, 12, {
       tiebreakOnP: true,
       mode: 'player',
-      idx: {
-        P: 12,
-        SV: 3,
-        PV: 2,
-        D: 4,
-        B: 6,
-        E: 7,
-        A: 8,
-        HIO: 9
-      }
+      idx: { P:12, SV:3, PV:2, D:4, B:6, E:7, A:8, HIO:9 }
     });
   }
 
   // ===== Render =====
   function render(state){
     state = sanitizeState(state);
-teamList.innerHTML = '';
+
+    teamList.innerHTML = '';
     roundList.innerHTML = '';
 
     state.rounds = Array.isArray(state.rounds) ? state.rounds.slice() : [];
     state.rounds.sort((a,b) => (a.date || '').localeCompare(b.date || ''));
 
     state.matches = Array.isArray(state.matches) ? state.matches : [];
-    if(renumberMatches(state)) save(state);
+    if(renumberMatches(state)){
+      // renumber är ren UI-fix, men vi sparar (await-fritt här för att inte låsa UI)
+      save(state);
+    }
 
     sortTeamsAndPlayers2Lag(state);
 
-    // stats
     renderPlayerStats(state);
     renderLagStats(state);
 
@@ -2519,7 +2503,7 @@ teamList.innerHTML = '';
         toggleTeam.textContent = isTeamOpen(t.id) ? 'Dölj' : 'Visa';
         toggleTeam.addEventListener('click', () => {
           expandedTeams[t.id] = !isTeamOpen(t.id);
-          render(load());
+          render(loadLocal());
         });
 
         const addP = document.createElement('button');
@@ -2549,7 +2533,6 @@ teamList.innerHTML = '';
         item.appendChild(right);
         teamList.appendChild(item);
 
-        // Players under team
         const teamChildrenWrap = document.createElement('div');
         teamChildrenWrap.style.display = isTeamOpen(t.id) ? '' : 'none';
         teamChildrenWrap.style.marginTop = '6px';
@@ -2601,14 +2584,14 @@ teamList.innerHTML = '';
             cap.className = 'btn small';
             cap.type = 'button';
             cap.textContent = 'Kapten';
-            cap.addEventListener('click', () => {
-              const s2 = load();
+            cap.addEventListener('click', async () => {
+              const s2 = loadLocal();
               s2.players.forEach(x => {
                 if(x.teamId === p.teamId) x.isCaptain = false;
               });
               const pp = s2.players.find(x => x.id === p.id);
               if(pp) pp.isCaptain = true;
-              save(s2);
+              await save(s2);
               render(s2);
             });
 
@@ -2691,7 +2674,7 @@ teamList.innerHTML = '';
         toggleRound.textContent = isRoundOpen(r.id) ? 'Dölj' : 'Visa';
         toggleRound.addEventListener('click', () => {
           expandedRounds[r.id] = !isRoundOpen(r.id);
-          render(load());
+          render(loadLocal());
         });
 
         const addMatch = document.createElement('button');
@@ -2721,7 +2704,6 @@ teamList.innerHTML = '';
         item.appendChild(right);
         roundList.appendChild(item);
 
-        // Matches under round
         const roundChildrenWrap = document.createElement('div');
         roundChildrenWrap.style.display = isRoundOpen(r.id) ? '' : 'none';
         roundChildrenWrap.style.marginTop = '6px';
@@ -2739,9 +2721,9 @@ teamList.innerHTML = '';
             (Array.isArray(m.teamA) && m.teamA.some(Boolean)) ||
             (Array.isArray(m.teamB) && m.teamB.some(Boolean));
 
-          if(m.isClosed === true) mi.style.background = 'rgba(255,0,0,.20)';      // stängd
-          else if(hasPlayers) mi.style.background = 'rgba(22,163,74,.18)';       // har spelare
-          else mi.style.background = 'rgba(255,255,255,.08)';                    // tom
+          if(m.isClosed === true) mi.style.background = 'rgba(255,0,0,.20)';
+          else if(hasPlayers) mi.style.background = 'rgba(22,163,74,.18)';
+          else mi.style.background = 'rgba(255,255,255,.08)';
 
           const ml = document.createElement('div');
           ml.className = 'left';
@@ -2772,18 +2754,16 @@ teamList.innerHTML = '';
 
           const t1 = document.createElement('div');
           t1.className = 'name';
-          t1.style.fontWeight = '700'; // lite starkare bas
+          t1.style.fontWeight = '700';
           t1.style.display = 'flex';
           t1.style.alignItems = 'baseline';
           t1.style.gap = '10px';
           t1.style.flexWrap = 'wrap';
 
-          // Matchnumret (starkare)
           const strongNo = document.createElement('span');
           strongNo.textContent = `Match ${matchNo}`;
           strongNo.style.fontWeight = '900';
 
-          // Metadata (svagare)
           const meta = document.createElement('span');
           const typeLabel = m.type === 'Par' ? 'Bästboll' : 'Singel';
           meta.textContent = `${typeLabel} • Individuellt värde ${m.value}`;
@@ -2792,7 +2772,6 @@ teamList.innerHTML = '';
 
           t1.appendChild(strongNo);
           t1.appendChild(meta);
-
           line1.appendChild(t1);
 
           const res = getClosedWinnerAndHole(m);
@@ -2801,7 +2780,6 @@ teamList.innerHTML = '';
             const bTeamName = bTeamId ? (state.teams.find(t => t.id === bTeamId)?.name || 'Lag B') : 'Lag B';
 
             const win = document.createElement('div');
-            win.style.fontWeight = '600';
             win.style.whiteSpace = 'nowrap';
             win.style.fontWeight = '900';
             win.style.fontSize = '1.02rem';
@@ -2909,15 +2887,15 @@ teamList.innerHTML = '';
           reopen.className = 'btn small';
           reopen.type = 'button';
           reopen.textContent = 'Öppna match';
-          reopen.addEventListener('click', () => {
+          reopen.addEventListener('click', async () => {
             if(!confirm('Öppna matchen igen?\n\nDetta gör att matchen räknas som ej avslutad och påverkar statistik igen när du avslutar på nytt.')) return;
 
-            const s2 = load();
+            const s2 = loadLocal();
             const mm = (s2.matches || []).find(x => x.id === m.id);
             if(!mm) return;
 
             mm.isClosed = false;
-            save(s2);
+            await save(s2);
             render(s2);
           });
 
@@ -2925,15 +2903,14 @@ teamList.innerHTML = '';
           del.className = 'btn danger small';
           del.type = 'button';
           del.textContent = 'Ta bort';
-          del.addEventListener('click', () => {
+          del.addEventListener('click', async () => {
             if(!confirm('Ta bort matchen?')) return;
-            const s2 = load();
+            const s2 = loadLocal();
             s2.matches = (s2.matches || []).filter(x => x.id !== m.id);
-            save(s2);
+            await save(s2);
             render(s2);
           });
 
-          // ✅ ENDA logiken som styr vilka knappar som syns
           if(m.isClosed === true){
             mr.appendChild(reopen);
             mr.appendChild(del);
@@ -2946,7 +2923,6 @@ teamList.innerHTML = '';
           mi.appendChild(ml);
           mi.appendChild(mr);
           roundChildrenWrap.appendChild(mi);
-
         });
       });
     }
@@ -2955,10 +2931,14 @@ teamList.innerHTML = '';
     enableStatTableSorting();
   }
 
-  // ===== Start =====
-  const initial = load();
-  render(initial);
+  // ===== Start (cloud först, sen local fallback) =====
+  (async () => {
+    const initial = await loadFromCloudOrLocal();
+    render(initial);
+  })();
+
 })();
 </script>
+
 </body>
 </html>
