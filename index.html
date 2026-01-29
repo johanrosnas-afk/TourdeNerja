@@ -1555,251 +1555,53 @@ h1{
     return { leadingTeamId: leadingTeamId || '' };
   }
 
-  function computePlayerStats(state){
-    const players = Array.isArray(state.players) ? state.players.slice() : [];
-    players.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'sv'));
-
-    const ps = {};
-    players.forEach(p => {
-      ps[p.id] = { SM:0, PV:0, SV:0, F:0, D:0, B:0, E:0, A:0, HIO:0, NF:0, LD:0, P:0, FF:0 };
-    });
-
-    const matchesAll = Array.isArray(state.matches) ? state.matches : [];
-
-    const W_BIRDIE = 1.5;
-    const W_EAGLE = 3.5;
-    const W_ALBATROSS = 30;
-    const W_HIO = 20;
-    const W_NF = 1.5;
-    const W_LD = 1.5;
-
-    matchesAll.forEach(m => {
-      if(!m || !m.isClosed) return;
-
-      const res = getClosedWinnerAndHole(m);
-      const winner = res.winner; // A|B|D
-      if(!winner) return;
-
-      const value = Number(m.value) || 0;
-
-      const teamA = Array.isArray(m.teamA) ? m.teamA.filter(Boolean) : [];
-      const teamB = Array.isArray(m.teamB) ? m.teamB.filter(Boolean) : [];
-      const playersInMatch = [...teamA, ...teamB];
-
-      // Spelade matcher
-      playersInMatch.forEach(pid => {
-        if(ps[pid]) ps[pid].SM += 1;
-      });
-
-      // Matchpoäng + PV/SV/D/F
-      if(winner === 'A' || winner === 'B'){
-        const winners = (winner === 'A') ? teamA : teamB;
-        const losers  = (winner === 'A') ? teamB : teamA;
-
-        losers.forEach(pid => {
-          if(ps[pid]) ps[pid].F += 1;
-        });
-
-        winners.forEach(pid => {
-          if(!ps[pid]) return;
-
-          if(m.type === 'Par') ps[pid].PV += 1;
-          else ps[pid].SV += 1;
-
-          ps[pid].P += value;
-        });
-
-      }else if(winner === 'D'){
-        const share = value / 2;
-        playersInMatch.forEach(pid => {
-          if(!ps[pid]) return;
-          ps[pid].D += 1;
-          ps[pid].P += share;
-        });
-      }
-
-      // Prestationskolumner + prestationspoäng
-      const byPlayer = (m.book && m.book.byPlayer && typeof m.book.byPlayer === 'object') ? m.book.byPlayer : {};
-      playersInMatch.forEach(pid => {
-        if(!ps[pid]) return;
-        const s = byPlayer[pid] || {};
-
-        const birdies = Number(s.birdies) || 0;
-        const eagles = Number(s.eagles) || 0;
-        const albatross = Number(s.albatross) || 0;
-        const hio = Number(s.hio) || 0;
-        const nf = Number(s.ctp) || 0;
-        const ld = Number(s.ld) || 0;
-
-        ps[pid].B += birdies;
-        ps[pid].E += eagles;
-        ps[pid].A += albatross;
-        ps[pid].HIO += hio;
-        ps[pid].NF += nf;
-        ps[pid].LD += ld;
-
-        ps[pid].P += (birdies * W_BIRDIE)
-                  + (eagles * W_EAGLE)
-                  + (albatross * W_ALBATROSS)
-                  + (hio * W_HIO)
-                  + (nf * W_NF)
-                  + (ld * W_LD);
-      });
-    });
-
-    // FF: -5 till spelare i ledande lag
-    const leadingTeamId = computeTeamTotalsForFF(state).leadingTeamId;
-    if(leadingTeamId){
-      players.forEach(p => {
-        if(p.teamId === leadingTeamId && ps[p.id]) ps[p.id].FF += -5;
-      });
-    }
-
-    // FF: topp 3 i P får -3/-2/-1
-    const ranked = players.slice().sort((a,b) => {
-      const A = ps[a.id] || {};
-      const B = ps[b.id] || {};
-
-      const aP  = Number(A.P)  || 0;
-      const bP  = Number(B.P)  || 0;
-
-      const aSV = Number(A.SV) || 0;
-      const bSV = Number(B.SV) || 0;
-
-      const aPV = Number(A.PV) || 0;
-      const bPV = Number(B.PV) || 0;
-
-      const aD  = Number(A.D)  || 0;
-      const bD  = Number(B.D)  || 0;
-
-      const aB  = Number(A.B)  || 0;
-      const bB  = Number(B.B)  || 0;
-
-      const aE  = Number(A.E)  || 0;
-      const bE  = Number(B.E)  || 0;
-
-      const aAl = Number(A.A)  || 0;
-      const bAl = Number(B.A)  || 0;
-
-      const aH  = Number(A.HIO)|| 0;
-      const bH  = Number(B.HIO)|| 0;
-
-      const dir = -1;
-
-      if(bP !== aP) return dir * (aP - bP);
-      if(bSV !== aSV) return dir * (aSV - bSV);
-      if(bPV !== aPV) return dir * (aPV - bPV);
-
-      if(bAl !== aAl) return dir * (aAl - bAl);
-      if(bH  !== aH)  return dir * (aH  - bH);
-      if(bE  !== aE)  return dir * (aE  - bE);
-      if(bB  !== aB)  return dir * (aB  - bB);
-
-      const aM = aPV + aSV + aD;
-      const bM = bPV + bSV + bD;
-      if(aM !== bM) return aM - bM;
-
-      return (a.name||'').localeCompare(b.name||'', 'sv');
-    });
-
-    const topFF = [-3, -2, -1];
-    for(let i=0;i<3 && i<ranked.length;i++){
-      const pid = ranked[i].id;
-      if(ps[pid]) ps[pid].FF += topFF[i];
-    }
-
-    return { players, ps };
-  }
-
   function renderPlayerStats(state){
     const body = document.getElementById('playerStatsBody');
     if(!body) return;
-
+  
     body.innerHTML = '';
-
-    const { players, ps } = computePlayerStats(state);
-
-    // ✅ Default-sort (som admin): P ↓, SV ↓, PV ↓, A ↓, HIO ↓, E ↓, B ↓, färre matcher, namn
-    players.sort((p1, p2) => {
-      const A = ps[p1.id] || {};
-      const B = ps[p2.id] || {};
-
-      const aP  = Number(A.P)  || 0;
-      const bP  = Number(B.P)  || 0;
-      if(bP !== aP) return bP - aP;
-
-      const aSV = Number(A.SV) || 0;
-      const bSV = Number(B.SV) || 0;
-      if(bSV !== aSV) return bSV - aSV;
-
-      const aPV = Number(A.PV) || 0;
-      const bPV = Number(B.PV) || 0;
-      if(bPV !== aPV) return bPV - aPV;
-
-      const aAl = Number(A.A)  || 0;
-      const bAl = Number(B.A)  || 0;
-      if(bAl !== aAl) return bAl - aAl;
-
-      const aH  = Number(A.HIO) || 0;
-      const bH  = Number(B.HIO) || 0;
-      if(bH !== aH) return bH - aH;
-
-      const aE  = Number(A.E)  || 0;
-      const bE  = Number(B.E)  || 0;
-      if(bE !== aE) return bE - aE;
-
-      const aB  = Number(A.B)  || 0;
-      const bB  = Number(B.B)  || 0;
-      if(bB !== aB) return bB - aB;
-
-      // färre matcher spelade (PV+SV+D) är bättre
-      const aM = (Number(A.PV)||0) + (Number(A.SV)||0) + (Number(A.D)||0);
-      const bM = (Number(B.PV)||0) + (Number(B.SV)||0) + (Number(B.D)||0);
-      if(aM !== bM) return aM - bM;
-
-      return (p1.name || '').localeCompare(p2.name || '', 'sv');
-    });
-
-    if(players.length === 0){
+  
+    const rows = state?.stats?.playerRows;
+    if(!Array.isArray(rows) || rows.length === 0){
       const tr = document.createElement('tr');
       const td = document.createElement('td');
       td.colSpan = 14;
-      td.textContent = 'Inga spelare skapade ännu.';
+      td.textContent = 'Ingen spelarstatistik ännu.';
       td.style.textAlign = 'left';
       td.style.color = 'var(--muted)';
       tr.appendChild(td);
       body.appendChild(tr);
       return;
     }
-
-    for(const p of players){
+  
+    for(const r of rows){
       const tr = document.createElement('tr');
-
+  
       const tdName = document.createElement('td');
       const dot = document.createElement('span');
       dot.className = 'team-dot';
-      dot.style.background = teamColorById(state, p.teamId);
+      dot.style.background = teamColorById(state, r.teamId);
       const name = document.createElement('span');
-      name.textContent = p.name || '';
+      name.textContent = r.name || '';
       tdName.appendChild(dot);
       tdName.appendChild(name);
       tr.appendChild(tdName);
-
-      const s = ps[p.id] || { SM:0, PV:0, SV:0, D:0, F:0, B:0, E:0, A:0, HIO:0, NF:0, LD:0, P:0, FF:0 };
-
+  
       const cells = [
-        s.SM, s.PV, s.SV, s.D, s.F, s.B, s.E, s.A, s.HIO, s.NF, s.LD, fmtPts(s.P), fmtPts(s.FF)
+        r.SM, r.PV, r.SV, r.D, r.F, r.B, r.E, r.A, r.HIO, r.NF, r.LD,
+        fmtPts(r.P), fmtPts(r.FF)
       ];
-
+  
       cells.forEach(v => {
         const td = document.createElement('td');
-        td.textContent = String(v).replace('.', ',');
+        td.textContent = String(v ?? 0).replace('.', ',');
         tr.appendChild(td);
       });
-
+  
       body.appendChild(tr);
     }
   }
+
 
   // ===== Sortering (som admin) =====
   function makeTableSortable(table, defaultIndex, opts){
