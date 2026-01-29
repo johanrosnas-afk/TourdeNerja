@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tour de Nerja – Startsida</title>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
   --bg:#0a0a0b;
@@ -19,8 +19,6 @@
   --max:1080px;
   --header-h:56px;
 
-  --ok:#16a34a;
-
   --bar-bg:rgba(255,255,255,.06);
   --bar-line:rgba(255,255,255,.10);
   --bar-split:rgba(0,0,0,.55);
@@ -31,23 +29,20 @@
 }
 
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
   background:var(--bg);
   color:var(--text);
 }
-
 a{color:inherit;text-decoration:none}
-
 .wrap{
   max-width:var(--max);
   margin:0 auto;
   padding:22px 18px 80px;
 }
 
-/* ===== Header (behåll) ===== */
+/* ===== Header ===== */
 header{
   position:sticky;
   top:0;
@@ -58,7 +53,6 @@ header{
   border-bottom:1px solid var(--line);
   overflow:visible;
 }
-
 .top{
   position:relative;
   max-width:var(--max);
@@ -70,14 +64,12 @@ header{
   justify-content:space-between;
   gap:12px;
 }
-
 .brand{
   position:absolute;
   left:18px;
   top:0;
   z-index:3;
 }
-
 .logo{
   height:100px;
   width:auto;
@@ -85,52 +77,30 @@ header{
   position:relative;
   top:18px;
 }
-
 nav{
   display:flex;
   gap:10px;
   margin-left:140px;
   align-items:center;
 }
-
 nav a{
   padding:10px 12px;
   border-radius:16px;
   color:var(--muted);
   white-space:nowrap;
 }
-
 nav a:hover{
   background:rgba(255,255,255,.06);
   color:var(--text);
 }
 
-.btn{
-  font-family:inherit;
-  padding:10px 14px;
-  border-radius:16px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  font-weight:600;
-  white-space:nowrap;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-.btn:hover{filter:brightness(1.06)}
-
-
 /* ===== Hero ===== */
 .hero{padding:72px 0 18px}
-
 h1{
   margin:0;
   font-size:clamp(2.2rem,4.6vw + .4rem,4.6rem);
   line-height:.98;
 }
-
 .lead{
   margin:14px 0 0;
   color:var(--muted);
@@ -156,7 +126,6 @@ h1{
   gap:12px;
   margin-bottom:10px;
 }
-
 .bar-team{
   font-weight:700;
   letter-spacing:.2px;
@@ -165,9 +134,7 @@ h1{
   text-overflow:ellipsis;
   max-width:48%;
 }
-
 .bar-team.right{text-align:right}
-
 .bar{
   position:relative;
   border:1px solid var(--bar-line);
@@ -175,13 +142,11 @@ h1{
   background:rgba(0,0,0,.18);
   overflow:hidden;
 }
-
 .bar-grid{
   display:grid;
   grid-template-columns:repeat(14,1fr);
   height:52px;
 }
-
 .seg{
   position:relative;
   display:flex;
@@ -191,7 +156,6 @@ h1{
   border-right:1px solid var(--bar-split);
 }
 .seg:last-child{border-right:0}
-
 .seg-text{
   position:relative;
   z-index:2;
@@ -204,40 +168,21 @@ h1{
   color:var(--text);
   text-shadow:0 1px 10px rgba(0,0,0,.6);
 }
-
 .seg.a{background:var(--team-a)}
 .seg.b{background:var(--team-b)}
-
-/* 0,5 ruta */
-.seg.half.a{
-  background:linear-gradient(to right,var(--team-a) 50%,var(--bar-bg) 50%);
-}
-.seg.half.b{
-  background:linear-gradient(to left,var(--team-b) 50%,var(--bar-bg) 50%);
-}
-
+.seg.half.a{ background:linear-gradient(to right,var(--team-a) 50%,var(--bar-bg) 50%); }
+.seg.half.b{ background:linear-gradient(to left,var(--team-b) 50%,var(--bar-bg) 50%); }
 .bar::after{
   content:"";
   position:absolute;
-  top:0;
-  bottom:0;
+  top:0; bottom:0;
   left:50%;
   width:2px;
   background:var(--bar-mid);
   transform:translateX(-1px);
 }
 
-@media(max-width:720px){
-  .logo{height:64px;top:10px}
-  nav{margin-left:92px}
-  .hero{padding-top:56px}
-  .bar-grid{height:44px}
-}
-
-/* =========================================================
-   MATCHBOX + MATCHBAR
-   ========================================================= */
-
+/* ===== Matchbox ===== */
 .roundtabs{
   display:flex;
   gap:10px;
@@ -245,7 +190,6 @@ h1{
   justify-content:center;
   margin:6px 0 10px;
 }
-
 .roundtab{
   font-family:inherit;
   padding:10px 14px;
@@ -268,9 +212,7 @@ h1{
   margin:2px 0 14px;
   white-space:normal;
 }
-
 .matches-list{ display:grid; gap:14px; }
-
 .empty{
   border:1px dashed rgba(255,255,255,.18);
   background:rgba(0,0,0,.10);
@@ -281,25 +223,23 @@ h1{
   font-weight:800;
 }
 
-/* ===== Matchbar (DYNAMISK via CSS-variabler) ===== */
+/* ===== Matchbar ===== */
 .matchbar{
   border-radius:22px;
   overflow:hidden;
   border:1px solid rgba(0,0,0,.35);
   box-shadow:0 10px 26px rgba(0,0,0,.35);
-  background: var(--mb-bg, #bfbfbf);
+  background: var(--mb-bg, rgba(255,255,255,.12));
 }
-
 .matchbar-head{
   padding:10px 14px;
-  background: var(--mb-head-bg, rgba(255,255,255,.18));
+  background: rgba(255,255,255,.16);
   border-bottom:1px solid rgba(0,0,0,.18);
   text-align:center;
   font-weight:600;
   letter-spacing:.2px;
-  color: var(--mb-head-text, #111);
+  color: rgba(255,255,255,.95);
 }
-
 .matchbar-body{
   position:relative;
   display:grid;
@@ -308,93 +248,61 @@ h1{
   gap:12px;
   padding:16px 18px;
   min-height:82px;
-  background: transparent;
   overflow:hidden;
   --mid-gap: 140px;
 }
-
 .matchbar-body::before,
 .matchbar-body::after{
   content:"";
   position:absolute;
-  top:0;
-  bottom:0;
+  top:0; bottom:0;
   pointer-events:none;
   z-index:0;
-  background:transparent;
 }
-
-/* A vinner */
 .matchbar-body.fill-a::before{
   left:0;
   width:calc(50% - (var(--mid-gap) / 2));
   background: var(--team-a);
   clip-path:polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
 }
-
-/* B vinner */
 .matchbar-body.fill-b::after{
   right:0;
   width:calc(50% - (var(--mid-gap) / 2));
   background: var(--team-b);
   clip-path:polygon(8% 0, 100% 0, 100% 100%, 8% 100%, 0 50%);
 }
-
-/* Delad */
 .matchbar-body.fill-d::before{
   left:0;
   width:calc(50% - (var(--mid-gap) / 2));
-  background: var(--mb-draw-fill, rgba(0,0,0,.22));
+  background: rgba(0,0,0,.22);
   clip-path:polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
 }
 .matchbar-body.fill-d::after{
   right:0;
   width:calc(50% - (var(--mid-gap) / 2));
-  background: var(--mb-draw-fill, rgba(0,0,0,.22));
+  background: rgba(0,0,0,.22);
   clip-path:polygon(8% 0, 100% 0, 100% 100%, 8% 100%, 0 50%);
 }
-
 .matchside, .matchcenter{ position:relative; z-index:1; }
-
-.matchside{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  min-width:0;
-}
-.matchside.left{ align-items:flex-start; text-align:left; }
-.matchside.right{ align-items:flex-end; text-align:right; }
-
+.matchside{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.matchside.left{align-items:flex-start;text-align:left;}
+.matchside.right{align-items:flex-end;text-align:right;}
 .matchteam{
   font-weight:700;
   font-size:1.10rem;
   line-height:1.1;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:100%;
-  color: var(--mb-text, #111);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color: rgba(255,255,255,.95);
 }
-
 .matchplayers{
   font-weight:600;
   opacity:.9;
   font-size:0.9rem;
   line-height:1.15;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:100%;
-  color: var(--mb-text, #111);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color: rgba(255,255,255,.95);
 }
-
-.matchcenter{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-}
-
+.matchcenter{display:flex;justify-content:center;align-items:center;text-align:center;}
 .matchresult{
   font-weight:700;
   font-size:1.50rem;
@@ -402,22 +310,10 @@ h1{
   line-height:1;
   padding:6px 0;
   min-width:140px;
-  color: var(--mb-result-text, #fff);
+  color: rgba(255,255,255,.95);
 }
 
-@media (max-width: 720px){
-  .matchbar-body{
-    grid-template-columns: 1fr 160px 1fr;
-    padding:14px 14px;
-    --mid-gap: 120px;
-    min-height:76px;
-  }
-  .matchresult{font-size:1.6rem; min-width:110px;}
-  .matchteam{font-size:1rem;}
-  .matchplayers{font-size:.88rem;}
-}
-
-/* ===== Publik statistikbox: tabs + tabeller (matchar admin.html) ===== */
+/* ===== Statistikbox ===== */
 .tabs{
   margin-top:8px;
   display:flex;
@@ -436,7 +332,6 @@ h1{
 }
 .tabbtn.is-active{background:rgba(255,255,255,.10)}
 
-/* Tabeller (layout som admin) */
 .table-wrap{padding:0;margin:0;background:transparent;border:0}
 .scoretable{
   width:100%;
@@ -445,13 +340,7 @@ h1{
   border:0;
   background:transparent;
   font-variant-numeric: tabular-nums;
-}
-.tiebreak-note{
-  margin-top:10px;
-  color:var(--muted);
-  font-size:.80rem;
-  font-weight:600;
-  text-align:left;
+  min-width: 720px;
 }
 .scoretable th, .scoretable td{
   padding:10px 10px;
@@ -463,96 +352,68 @@ h1{
 .scoretable thead th{color:var(--muted);font-weight:700}
 .scoretable tbody tr:last-child td{border-bottom:0}
 .scoretable th:first-child, .scoretable td:first-child{text-align:left}
-
-#lagStatsBlock .scoretable, #playerStatsBlock .scoretable{table-layout:fixed}
-#lagStatsBlock .scoretable th:first-child, #lagStatsBlock .scoretable td:first-child{width: 26%}
-#lagStatsBlock .scoretable th:not(:first-child), #lagStatsBlock .scoretable td:not(:first-child){width: calc(74% / 7)}
-#playerStatsBlock .scoretable th:first-child, #playerStatsBlock .scoretable td:first-child{width: 26%}
-#playerStatsBlock .scoretable th:not(:first-child), #playerStatsBlock .scoretable td:not(:first-child){width: calc(74% / 13)}
-#playerStatsBlock thead th{white-space:normal;word-break:break-word;overflow-wrap:anywhere;line-height:1.15;padding-top:8px;padding-bottom:8px}
-
 .team-dot{
   display:inline-block;
   width:10px;height:10px;border-radius:999px;
   margin-right:8px;vertical-align:middle;
   border:1px solid rgba(255,255,255,.25);
 }
-/* ===== Mobile improvements (lägg längst ner i <style>) ===== */
 
-@media (max-width: 720px){
-  header{ height:auto; }
-  .top{
-    padding: 10px 14px;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .brand{ position: static; }
-  .logo{ height: 56px; top: 0; }
-
-  nav{
-    margin-left: 0;
-    width: 100%;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  nav a{
-    flex: 1 1 auto;
-    text-align: center;
-    padding: 10px 10px;
-  }
-
-  .btn{ padding: 12px 14px; border-radius: 16px; }
-  .small{ padding: 10px 12px; border-radius: 14px; }
-
-  select, input[type="text"], input[type="date"]{
-    min-height: 44px;
-    border-radius: 16px;
-  }
-
-  .item{ flex-direction: column; align-items: stretch; }
-  .right{ justify-content: flex-start; width: 100%; }
-  .right .btn{ flex: 1 1 auto; }
-
-  .modal{ padding: 10px; align-items: flex-end; }
-  .modal-panel{
-    width: 100%;
-    border-radius: 22px 22px 0 0;
-  }
-  .modal-body{ max-height: 70vh; }
-  .modal-actions .btn{ flex: 1 1 auto; }
-}
-
-/* Tabeller: scroll + sticky första kolumnen */
-.table-wrap{
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.scoretable{
-  min-width: 720px;
-}
-@media(max-width:720px){
-  .scoretable th, .scoretable td{ padding: 8px 8px; font-size: .9rem; }
-}
+/* sticky första kolumnen + scroll */
+.table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .scoretable th:first-child,
 .scoretable td:first-child{
-  position: sticky;
-  left: 0;
+  position:sticky;
+  left:0;
   background: rgba(10,10,11,.92);
   backdrop-filter: blur(8px);
-  z-index: 2;
+  z-index:2;
 }
-.scoretable thead th:first-child{ z-index: 3; }
+.scoretable thead th:first-child{ z-index:3; }
 
-/* Hål-för-hål: scroll på mobil */
-#holeLedgerArea{
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 6px;
+.tiebreak-note{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:.80rem;
+  font-weight:600;
+  text-align:left;
 }
-.hole-ledger{
-  min-width: 720px;
+
+@media(max-width:720px){
+  header{height:auto;}
+  .top{
+    padding:10px 14px;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:space-between;
+  }
+  .brand{position:static;}
+  .logo{height:56px;top:0;}
+  nav{
+    margin-left:0;
+    width:100%;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  nav a{
+    flex:1 1 auto;
+    text-align:center;
+    padding:10px 10px;
+  }
+  .hero{padding-top:56px}
+  .bar-grid{height:44px}
+
+  .matchbar-body{
+    grid-template-columns: 1fr 160px 1fr;
+    padding:14px 14px;
+    --mid-gap: 120px;
+    min-height:76px;
+  }
+  .matchresult{font-size:1.6rem;min-width:110px;}
+  .matchteam{font-size:1rem;}
+  .matchplayers{font-size:.88rem;}
+
+  .scoretable th, .scoretable td{ padding:8px 8px; font-size:.9rem; }
 }
 </style>
 </head>
@@ -561,7 +422,6 @@ h1{
 <header>
   <div class="top">
     <a class="brand" href="#"><img class="logo" src="tour-de-nerja-logo.png" alt=""></a>
-
     <nav aria-label="Meny">
       <a href="#tourdenerja">Tour de Nerja</a>
       <a href="#statistik">Statistik</a>
@@ -572,9 +432,7 @@ h1{
 <main class="wrap" id="tourdenerja">
   <section class="hero">
     <h1>Tour de Nerja 2026</h1>
-    <p class="lead">
-      Matchplay, lagfokus och tillräckligt många sidobet för att göra matte till en kontaktsport.
-    </p>
+    <p class="lead">Matchplay, lagfokus och tillräckligt många sidobet för att göra matte till en kontaktsport.</p>
   </section>
 
   <section class="block" id="scorebarBlock">
@@ -612,23 +470,17 @@ h1{
     <div class="matches-list" id="matchesList"></div>
   </section>
 
-  <!-- ✅ NY BOX: Statistik UNDER matchboxen -->
   <section class="block" id="publicStatsBox">
     <div class="tabs" role="tablist" aria-label="Statistikflikar">
       <button class="tabbtn is-active" type="button" role="tab" aria-selected="true"
-              aria-controls="lagStatsBlock" id="tab-lagstats">
-        Lagstatistik
-      </button>
+              aria-controls="lagStatsBlock" id="tab-lagstats">Lagstatistik</button>
       <button class="tabbtn" type="button" role="tab" aria-selected="false"
-              aria-controls="playerStatsBlock" id="tab-playerstats">
-        Spelarstatistik
-      </button>
+              aria-controls="playerStatsBlock" id="tab-playerstats">Spelarstatistik</button>
     </div>
 
-    <!-- Lagstatistik (markup som admin) -->
     <section class="block" id="lagStatsBlock" style="margin-top:14px">
       <div class="table-wrap">
-        <table class="scoretable">
+        <table class="scoretable" id="lagStatsTable">
           <thead>
             <tr>
               <th title="Lag">Lag</th>
@@ -652,10 +504,9 @@ h1{
       </div>
     </section>
 
-    <!-- Spelarstatistik (markup som admin) -->
     <section class="block" id="playerStatsBlock" style="display:none; margin-top:14px">
       <div class="table-wrap">
-        <table class="scoretable">
+        <table class="scoretable" id="playerStatsTable">
           <thead>
             <tr>
               <th title="Spelare">Spelare</th>
@@ -688,24 +539,45 @@ h1{
         <br>6) Flest birdies (B).
       </div>
     </section>
-  </section>
 
-  <section id="statistik" style="height:1px;"></section>
+    <section id="statistik" style="height:1px;"></section>
+  </section>
 </main>
 
 <script>
-  const SUPABASE_URL = "https://bedouordcrbaucvlnwkw.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZG91b3JkY3JiYXVjdmxud2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MzExMzMsImV4cCI6MjA4NTIwNzEzM30.mv9BVpT5NR0zsY5U5uRLADpDZZxDNZk1e8La1UzzQmU";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  
-(function(){
-  const KEY = 'tdn_admin_state_v2';
+const SUPABASE_URL = "https://bedouordcrbaucvlnwkw.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZG91b3JkY3JiYXVjdmxud2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MzExMzMsImV4cCI6MjA4NTIwNzEzM30.mv9BVpT5NR0zsY5U5uRLADpDZZxDNZk1e8La1UzzQmU";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // =========================
-  // Helpers
-  // =========================
+(function(){
+
   function setEmpty(el, text){
     el.innerHTML = `<div class="empty">${text}</div>`;
+  }
+
+  function fmtScore(n){
+    const x = Number(n) || 0;
+    return (x % 1 === 0) ? String(x) : String(x).replace('.', ',');
+  }
+
+  function fmtPts(x){
+    const n = Number(x) || 0;
+    return (n % 1 === 0) ? String(n) : n.toFixed(1).replace('.', ',');
+  }
+
+  function teamColorById(state, teamId){
+    const t = (state.teams || []).find(x => x && x.id === teamId);
+    return t?.color || 'rgba(255,255,255,.22)';
+  }
+
+  function sanitizeState(state){
+    state = state && typeof state === 'object' ? state : {};
+    state.teams   = Array.isArray(state.teams)   ? state.teams   : [];
+    state.players = Array.isArray(state.players) ? state.players : [];
+    state.rounds  = Array.isArray(state.rounds)  ? state.rounds  : [];
+    state.matches = Array.isArray(state.matches) ? state.matches : [];
+    state.stats   = (state.stats && typeof state.stats === 'object') ? state.stats : {};
+    return state;
   }
 
   async function loadState(){
@@ -717,67 +589,30 @@ h1{
         .single();
 
       if(error || !data || !data.data){
-        // Om inget finns i molnet än: returnera tomt state
-        return {teams:[], players:[], rounds:[], matches:[]};
+        return sanitizeState({teams:[], players:[], rounds:[], matches:[], stats:{}});
       }
 
-      const d = data.data;
+      const d = data.data || {};
 
+      // ✅ NYCKELFIX: behåll stats från admin
       return sanitizeState({
-        teams: Array.isArray(d.teams) ? d.teams : [],
+        teams:   Array.isArray(d.teams)   ? d.teams   : [],
         players: Array.isArray(d.players) ? d.players : [],
-        rounds: Array.isArray(d.rounds) ? d.rounds : [],
-        matches: Array.isArray(d.matches) ? d.matches : []
+        rounds:  Array.isArray(d.rounds)  ? d.rounds  : [],
+        matches: Array.isArray(d.matches) ? d.matches : [],
+        stats:   (d.stats && typeof d.stats === 'object') ? d.stats : {}
       });
+
     }catch(e){
-      return {teams:[], players:[], rounds:[], matches:[]};
+      return sanitizeState({teams:[], players:[], rounds:[], matches:[], stats:{}});
     }
   }
 
-  function sanitizeState(state){
-    state = state && typeof state === 'object' ? state : {teams:[], players:[], rounds:[], matches:[]};
-    state.players = Array.isArray(state.players) ? state.players : [];
-    state.matches = Array.isArray(state.matches) ? state.matches : [];
-
-    const valid = new Set(state.players.map(p => p && p.id).filter(Boolean));
-
-    state.matches.forEach(m => {
-      if(!m) return;
-
-      m.teamA = (Array.isArray(m.teamA) ? m.teamA : []).filter(pid => valid.has(pid));
-      m.teamB = (Array.isArray(m.teamB) ? m.teamB : []).filter(pid => valid.has(pid));
-
-      if(m.book && m.book.byPlayer && typeof m.book.byPlayer === 'object'){
-        Object.keys(m.book.byPlayer).forEach(pid => {
-          if(!valid.has(pid)) delete m.book.byPlayer[pid];
-        });
-      }
-
-      const aOk = m.teamA.length > 0;
-      const bOk = m.teamB.length > 0;
-      if(!aOk || !bOk){
-        m.isClosed = false;
-        m.holes = Array(18).fill(null);
-        delete m.book;
-      }
-    });
-
-    return state;
-  }
-
-  function playerNameById(state, id){
-    const p = (state.players || []).find(x => x && x.id === id);
-    return p ? (p.name || '') : '';
-  }
-
-  function fmtScore(n){
-    const x = Number(n) || 0;
-    return (x % 1 === 0) ? String(x) : String(x).replace('.', ',');
-  }
-
+  // =========================
+  // SCOREBAR (fortfarande baserat på stängda matcher)
+  // =========================
   function contrastTextColor(bg){
     const s = String(bg || '').trim();
-
     if(s.startsWith('#')){
       let r,g,b;
       if(s.length === 4){
@@ -788,12 +623,9 @@ h1{
         r = parseInt(s.slice(1,3),16);
         g = parseInt(s.slice(3,5),16);
         b = parseInt(s.slice(5,7),16);
-      }else{
-        return '#fff';
-      }
+      }else return '#fff';
       return _contrastFromRgb(r,g,b);
     }
-
     const m = s.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*[\d.]+)?\s*\)/i);
     if(m){
       const r = Math.max(0, Math.min(255, Number(m[1])));
@@ -801,7 +633,6 @@ h1{
       const b = Math.max(0, Math.min(255, Number(m[3])));
       return _contrastFromRgb(r,g,b);
     }
-
     return '#fff';
 
     function _contrastFromRgb(r,g,b){
@@ -814,125 +645,6 @@ h1{
     }
   }
 
-  function parseColorToRgb(c){
-    const s = String(c || '').trim();
-
-    if(s.startsWith('#')){
-      let r,g,b;
-      if(s.length === 4){
-        r = parseInt(s[1]+s[1],16);
-        g = parseInt(s[2]+s[2],16);
-        b = parseInt(s[3]+s[3],16);
-        return {r,g,b,a:1};
-      }
-      if(s.length === 7){
-        r = parseInt(s.slice(1,3),16);
-        g = parseInt(s.slice(3,5),16);
-        b = parseInt(s.slice(5,7),16);
-        return {r,g,b,a:1};
-      }
-    }
-
-    const m = s.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-    if(m){
-      const r = Math.max(0, Math.min(255, Number(m[1])||0));
-      const g = Math.max(0, Math.min(255, Number(m[2])||0));
-      const b = Math.max(0, Math.min(255, Number(m[3])||0));
-      const a = (m[4] == null) ? 1 : Math.max(0, Math.min(1, Number(m[4])||0));
-      return {r,g,b,a};
-    }
-
-    return null;
-  }
-
-  function blendOver(bgTop, bgBottom){
-    const top = parseColorToRgb(bgTop);
-    const bot = parseColorToRgb(bgBottom) || {r:10,g:10,b:11,a:1};
-    if(!top) return bot;
-    const a = (top.a == null ? 1 : top.a);
-    const r = Math.round(top.r * a + bot.r * (1 - a));
-    const g = Math.round(top.g * a + bot.g * (1 - a));
-    const b = Math.round(top.b * a + bot.b * (1 - a));
-    return {r,g,b,a:1};
-  }
-
-  function contrastTextFromRgb(rgb){
-    const srgb = [rgb.r,rgb.g,rgb.b].map(v => {
-      const x = v/255;
-      return x <= 0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4);
-    });
-    const L = 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
-    return (L > 0.52) ? '#000' : '#fff';
-  }
-
-  function applyMatchTextContrast(bar, wf, teamAColor, teamBColor){
-    const leftWrap  = bar.querySelector('.matchside.left');
-    const rightWrap = bar.querySelector('.matchside.right');
-
-    const leftEls  = leftWrap  ? leftWrap.querySelectorAll('.matchteam, .matchplayers') : [];
-    const rightEls = rightWrap ? rightWrap.querySelectorAll('.matchteam, .matchplayers') : [];
-
-    const base =
-      getComputedStyle(bar).getPropertyValue('--mb-text').trim() ||
-      'rgba(255,255,255,.95)';
-
-    [...leftEls, ...rightEls].forEach(el => { el.style.color = base; });
-
-    if(wf === 'A'){
-      const c = contrastTextColor(teamAColor);
-      leftEls.forEach(el => el.style.color = c);
-    }
-    else if(wf === 'B'){
-      const c = contrastTextColor(teamBColor);
-      rightEls.forEach(el => el.style.color = c);
-    }
-    else if(wf === 'D'){
-      leftEls.forEach(el => el.style.color = '#fff');
-      rightEls.forEach(el => el.style.color = '#fff');
-    }
-  }
-
-  function applyMatchBarTheme(bar, statusCls){
-    const themes = {
-      'is-scheduled': {
-        bg:       'rgba(50,50,50,.22)',
-        headBg:   'rgba(50,50,50,.22)',
-        headText: 'rgba(255,255,255,.95)',
-        text:     'rgba(255,255,255,.95)',
-        drawFill: 'rgba(0,0,0,.22)'
-      },
-      'is-open': {
-        bg:       'rgba(255,255,255,.12)',
-        headBg:   'rgba(255,255,255,.16)',
-        headText: 'rgba(255,255,255,.95)',
-        text:     'rgba(255,255,255,.95)',
-        drawFill: 'rgba(0,0,0,.22)'
-      },
-      'is-closed': {
-        bg:       'rgba(255,255,255,.12)',
-        headBg:   'rgba(255,255,255,.16)',
-        headText: 'rgba(255,255,255,.95)',
-        text:     'rgba(255,255,255,.95)',
-        drawFill: 'rgba(0,0,0,.22)'
-      }
-    };
-
-    const t = themes[statusCls] || themes['is-open'];
-
-    bar.style.setProperty('--mb-bg', t.bg);
-    bar.style.setProperty('--mb-head-bg', t.headBg);
-    bar.style.setProperty('--mb-head-text', t.headText);
-    bar.style.setProperty('--mb-text', t.text);
-    bar.style.setProperty('--mb-draw-fill', t.drawFill);
-
-    const rootBg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0a0a0b';
-    const blended = blendOver(t.bg, rootBg);
-    bar.style.setProperty('--mb-result-text', contrastTextFromRgb(blended));
-  }
-
-  // =========================
-  // SCOREBAR (lagpoäng i baren = antal matchvinster + delade 0,5)
-  // =========================
   function computeTeamPoints(state){
     const teams = state.teams || [];
     const teamA = teams[0] || null;
@@ -1062,7 +774,7 @@ h1{
   }
 
   // =========================
-  // MATCHBARS
+  // MATCHBARS (oförändrat – visar matcher)
   // =========================
   function roundsSorted(state){
     return (state.rounds || []).slice().sort((a,b) => (a.date || '').localeCompare(b.date || ''));
@@ -1090,6 +802,11 @@ h1{
     return m?.type ? String(m.type) : 'Singel';
   }
 
+  function playerNameById(state, id){
+    const p = (state.players || []).find(x => x && x.id === id);
+    return p ? (p.name || '') : '';
+  }
+
   function playersText(state, ids){
     const arr = Array.isArray(ids) ? ids.filter(Boolean) : [];
     const names = arr.map(id => playerNameById(state, id)).filter(Boolean);
@@ -1102,15 +819,9 @@ h1{
     return aHas && bHas;
   }
 
-  function matchStatusClass(m){
-    if(m?.isClosed === true) return 'is-closed';
-    if(hasBothSidesPlayers(m)) return 'is-open';
-    return 'is-scheduled';
-  }
-
-  function matchStatusLabelFromClass(cls){
-    if(cls === 'is-closed') return 'Avslutad';
-    if(cls === 'is-open') return 'Öppen';
+  function matchStatusLabel(m){
+    if(m?.isClosed === true) return 'Avslutad';
+    if(hasBothSidesPlayers(m)) return 'Öppen';
     return 'Uppsatt';
   }
 
@@ -1140,9 +851,7 @@ h1{
         const remaining = 18 - wonOnHole;
         return `${Math.max(1, up)}&${remaining}`;
       }
-      if(wonOnHole === 18){
-        return `${Math.max(1, up)}UP`;
-      }
+      if(wonOnHole === 18) return `${Math.max(1, up)}UP`;
       return `${Math.max(1, up)}UP`;
     }
 
@@ -1153,23 +862,14 @@ h1{
     const bar = document.createElement('div');
     bar.className = 'matchbar';
 
-    const statusCls = matchStatusClass(m);
-    bar.classList.add(statusCls);
-
-    applyMatchBarTheme(bar, statusCls);
-
     const head = document.createElement('div');
     head.className = 'matchbar-head';
-
     const no = Number(m?.no) || 0;
-    const type = matchTypeLabel(m);
-    const status = matchStatusLabelFromClass(statusCls);
-    head.textContent = `Match ${no || ''} - ${type} - ${status}`.trim();
+    head.textContent = `Match ${no || ''} - ${matchTypeLabel(m)} - ${matchStatusLabel(m)}`.trim();
 
     const body = document.createElement('div');
     body.className = 'matchbar-body';
 
-    body.classList.remove('fill-a','fill-b','fill-d');
     const wf = winnerForFill(m);
     if(wf === 'A') body.classList.add('fill-a');
     else if(wf === 'B') body.classList.add('fill-b');
@@ -1199,10 +899,6 @@ h1{
 
     bar.appendChild(head);
     bar.appendChild(body);
-
-    const teamAColor = state.teams?.[0]?.color || '#7c1d1d';
-    const teamBColor = state.teams?.[1]?.color || '#1e3a8a';
-    applyMatchTextContrast(bar, wf, teamAColor, teamBColor);
 
     return bar;
   }
@@ -1244,242 +940,37 @@ h1{
       });
       tabs.appendChild(btn);
     });
-  
+
     const roundIndex = rounds.findIndex(r => r.id === selected);
     const selectedRound = rounds[roundIndex];
     const ms = matchesForRound(state, selected);
-  
+
     sub.textContent = `${roundLabel(roundIndex, selectedRound)} • ${ms.length} matcher`;
-  
+
     list.innerHTML = '';
     if(ms.length === 0){
       setEmpty(list, 'Inga matcher i denna rond ännu.');
       return;
     }
-  
+
     ms.forEach(m => list.appendChild(buildMatchBar(state, m)));
   }
 
   // =========================
-  // STATISTIK – SPEGLING AV admin.html
+  // STATISTIK – REN SPEGLING AV ADMIN
   // =========================
-  function fmtPts(x){
-    const n = Number(x) || 0;
-    return (n % 1 === 0) ? String(n) : n.toFixed(1).replace('.', ',');
-  }
-
-  function getTeamsAB(state){
-    const teams = Array.isArray(state.teams) ? state.teams : [];
-    const A = teams[0] || null;
-    const B = teams[1] || null;
-    return {A,B};
-  }
-
-  function teamColorById(state, teamId){
-    const t = (state.teams || []).find(x => x && x.id === teamId);
-    return t?.color || 'rgba(255,255,255,.22)';
-  }
-
-  function computeMatchResultText(holes){
-    const h = Array.isArray(holes) ? holes : [];
-    let a = 0, b = 0, played = 0;
-
-    for(let i=0;i<18;i++){
-      const v = (i < h.length) ? h[i] : null;
-      if(v === 'A'){ a++; played++; }
-      else if(v === 'B'){ b++; played++; }
-      else if(v === 'H'){ played++; }
-    }
-    const remaining = 18 - played;
-    const diff = a - b;
-    const absDiff = Math.abs(diff);
-
-    if(absDiff > remaining) return absDiff + '&' + remaining;
-    if(played === 18){
-      if(diff === 0) return 'Tied';
-      return absDiff + 'UP';
-    }
-    if(diff === 0) return 'AS (' + remaining + ')';
-    return absDiff + 'UP (' + remaining + ')';
-  }
-
-  function computeOutcomeFromHoles(holes){
-    const h = Array.isArray(holes) ? holes : [];
-    let a = 0, b = 0, played = 0;
-    let clinchHole = 0;
-    let clinchUp = 0;
-    let clinchY = 0;
-
-    for(let i=0;i<18;i++){
-      const v = (i < h.length) ? h[i] : null;
-      if(v === 'A'){ a++; played++; }
-      else if(v === 'B'){ b++; played++; }
-      else if(v === 'H'){ played++; }
-      else { continue; }
-
-      const remaining = 18 - played;
-      const diff = a - b;
-      const absDiff = Math.abs(diff);
-
-      if(!clinchHole && absDiff > remaining){
-        clinchHole = i + 1;
-        clinchUp = absDiff;
-        clinchY = remaining;
-      }
-    }
-
-    if(clinchHole){
-      return {
-        decided: true,
-        winner: (a - b) > 0 ? 'A' : 'B',
-        wonOnHole: clinchHole,
-        resultUp: clinchUp,
-        text: clinchUp + '&' + clinchY
-      };
-    }
-
-    if(played === 18){
-      if(a === b) return { decided: true, winner: 'D', wonOnHole: '', resultUp: 0, text: 'Tied' };
-      return {
-        decided: true,
-        winner: (a - b) > 0 ? 'A' : 'B',
-        wonOnHole: 18,
-        resultUp: Math.abs(a - b),
-        text: Math.abs(a - b) + 'UP'
-      };
-    }
-
-    return { decided: false, winner: '', wonOnHole: '', resultUp: 0, text: computeMatchResultText(h) };
-  }
-
-  function getClosedWinnerAndHole(m){
-    const holes = (m && Array.isArray(m.holes)) ? m.holes : [];
-    const anyPlayed = Array.isArray(holes) && holes.some(v => v === 'A' || v === 'B' || v === 'H');
-    if(anyPlayed){
-      const out = computeOutcomeFromHoles(holes);
-      if(out.decided){
-        return {
-          winner: out.winner,
-          wonOnHole: Number(out.wonOnHole) || 0,
-          resultUp: Number(out.resultUp) || 0
-        };
-      }
-    }
-    const w = String(m?.book?.winner || '');
-    const h = Number(m?.book?.wonOnHole) || 0;
-    const up = Number(m?.book?.resultUp) || 0;
-    if(w === 'A' || w === 'B' || w === 'D') return { winner:w, wonOnHole:h, resultUp:up };
-    return { winner:'', wonOnHole:0, resultUp:0 };
-  }
-
-  function applyTeamResult(A, B, winner, wonOnHole, matchType){
-    if(winner === 'A'){
-      B.L++;
-      if(matchType === 'Par'){
-        A.W++;       // PV
-        A.P += 1;
-      }else if(matchType === 'Singel'){
-        A.S = (A.S || 0) + 1; // SV
-        A.P += 1;
-      }
-    }else if(winner === 'B'){
-      A.L++;
-      if(matchType === 'Par'){
-        B.W++;       // PV
-        B.P += 1;
-      }else if(matchType === 'Singel'){
-        B.S = (B.S || 0) + 1; // SV
-        B.P += 1;
-      }
-    }else if(winner === 'D'){
-      A.D++;
-      B.D++;
-      A.P += 0.5;
-      B.P += 0.5;
-    }else{
-      return;
-    }
-
-    // +/- endast vid avgjord match: delta = 19 - wonOnHole
-    if((winner === 'A' || winner === 'B') && wonOnHole >= 1 && wonOnHole <= 18){
-      const delta = 19 - wonOnHole;
-      if(winner === 'A'){
-        A.PM += delta;
-        B.PM -= delta;
-      }else{
-        B.PM += delta;
-        A.PM -= delta;
-      }
-    }
-  }
-
-  function computeTeamStats(state){
-    const teams = Array.isArray(state.teams) ? state.teams : [];
-    const { A: teamA, B: teamB } = getTeamsAB(state);
-
-    const ts = {};
-    teams.forEach(t => ts[t.id] = {
-      SM:0,  // Spelade matcher
-      W:0,   // PV
-      S:0,   // SV
-      L:0,   // F
-      D:0,
-      PM:0,  // +/-
-      P:0
-    });
-
-    if(!teamA || !teamB) return { teams, ts, leadingTeamId: '' };
-
-    const A = ts[teamA.id];
-    const B = ts[teamB.id];
-    const matches = Array.isArray(state.matches) ? state.matches : [];
-
-    matches.forEach(m => {
-      if(!m?.isClosed) return;
-      const res = getClosedWinnerAndHole(m);
-
-      A.SM += 1;
-      B.SM += 1;
-
-      applyTeamResult(A, B, res.winner, res.wonOnHole, m.type);
-    });
-
-    let leadingTeamId = '';
-
-    if(A.P > B.P){
-      leadingTeamId = teamA.id;
-    }else if(B.P > A.P){
-      leadingTeamId = teamB.id;
-    }else if(A.PM > B.PM){
-      leadingTeamId = teamA.id;
-    }else if(B.PM > A.PM){
-      leadingTeamId = teamB.id;
-    }else{
-      // tiebreak: flest vunna singelmatcher
-      const aSingles = (A.S || 0);
-      const bSingles = (B.S || 0);
-
-      if(aSingles > bSingles) leadingTeamId = teamA.id;
-      else if(bSingles > aSingles) leadingTeamId = teamB.id;
-      else leadingTeamId = '';
-    }
-
-    return { teams, ts, leadingTeamId };
-  }
-
-  function renderLagStats(state){
+  function renderLagStatsMirror(state){
     const body = document.getElementById('lagStatsBody');
     if(!body) return;
 
     body.innerHTML = '';
 
-    const { teams, ts } = computeTeamStats(state);
-
-    if(teams.length === 0){
+    const rows = state?.stats?.teamRows;
+    if(!Array.isArray(rows) || rows.length === 0){
       const tr = document.createElement('tr');
       const td = document.createElement('td');
       td.colSpan = 8;
-      td.textContent = 'Inga lag skapade ännu.';
+      td.textContent = 'Ingen lagstatistik ännu.';
       td.style.textAlign = 'left';
       td.style.color = 'var(--muted)';
       tr.appendChild(td);
@@ -1487,80 +978,39 @@ h1{
       return;
     }
 
-    function fmtTeamPts(x){
-      return (x % 1 === 0) ? String(x) : x.toFixed(1).replace('.', ',');
-    }
-
-    // ✅ Default-sort (som admin): P ↓, +/- (PM) ↓, SV ↓, PV ↓, namn
-    teams.sort((t1, t2) => {
-      const a = ts[t1.id] || {};
-      const b = ts[t2.id] || {};
-
-      const aP  = Number(a.P)  || 0;
-      const bP  = Number(b.P)  || 0;
-      if(bP !== aP) return bP - aP;
-
-      const aPM = Number(a.PM) || 0;
-      const bPM = Number(b.PM) || 0;
-      if(bPM !== aPM) return bPM - aPM;
-
-      const aSV = Number(a.S)  || 0; // SV ligger som S i teamstats
-      const bSV = Number(b.S)  || 0;
-      if(bSV !== aSV) return bSV - aSV;
-
-      const aPV = Number(a.W)  || 0; // PV ligger som W i teamstats
-      const bPV = Number(b.W)  || 0;
-      if(bPV !== aPV) return bPV - aPV;
-
-      return (t1.name || '').localeCompare(t2.name || '', 'sv');
-    });
-
-    teams.forEach(t => {
+    for(const r of rows){
       const tr = document.createElement('tr');
 
       const tdName = document.createElement('td');
       const dot = document.createElement('span');
       dot.className = 'team-dot';
-      dot.style.background = t.color || 'rgba(255,255,255,22)';
+      dot.style.background = teamColorById(state, r.teamId || r.id);
       const name = document.createElement('span');
-      name.textContent = t.name || '';
+      name.textContent = r.name || '';
       tdName.appendChild(dot);
       tdName.appendChild(name);
       tr.appendChild(tdName);
 
-      const s = ts[t.id] || {W:0,L:0,D:0,PM:0,P:0};
-
       const cells = [
-        s.SM || 0,   // SM
-        s.W || 0,    // PV
-        s.S || 0,    // SV
-        s.D || 0,    // D
-        s.L || 0,    // F
-        s.PM || 0,   // +/-
-        fmtTeamPts(s.P || 0)
+        r.SM, r.PV, r.SV, r.D, r.F, r.PM, fmtPts(r.P)
       ];
 
       cells.forEach(v => {
         const td = document.createElement('td');
-        td.textContent = String(v);
+        td.textContent = String(v ?? 0).replace('.', ',');
         tr.appendChild(td);
       });
 
       body.appendChild(tr);
-    });
+    }
   }
 
-  function computeTeamTotalsForFF(state){
-    const { leadingTeamId } = computeTeamStats(state);
-    return { leadingTeamId: leadingTeamId || '' };
-  }
-
-  function renderPlayerStats(state){
+  function renderPlayerStatsMirror(state){
     const body = document.getElementById('playerStatsBody');
     if(!body) return;
-  
+
     body.innerHTML = '';
-  
+
     const rows = state?.stats?.playerRows;
     if(!Array.isArray(rows) || rows.length === 0){
       const tr = document.createElement('tr');
@@ -1573,10 +1023,10 @@ h1{
       body.appendChild(tr);
       return;
     }
-  
+
     for(const r of rows){
       const tr = document.createElement('tr');
-  
+
       const tdName = document.createElement('td');
       const dot = document.createElement('span');
       dot.className = 'team-dot';
@@ -1586,35 +1036,33 @@ h1{
       tdName.appendChild(dot);
       tdName.appendChild(name);
       tr.appendChild(tdName);
-  
+
       const cells = [
         r.SM, r.PV, r.SV, r.D, r.F, r.B, r.E, r.A, r.HIO, r.NF, r.LD,
         fmtPts(r.P), fmtPts(r.FF)
       ];
-  
+
       cells.forEach(v => {
         const td = document.createElement('td');
         td.textContent = String(v ?? 0).replace('.', ',');
         tr.appendChild(td);
       });
-  
+
       body.appendChild(tr);
     }
   }
 
-
-  // ===== Sortering (som admin) =====
+  // ===== Sortering =====
   function makeTableSortable(table, defaultIndex, opts){
     if(!table) return;
     const thead = table.querySelector('thead');
     const tbody = table.querySelector('tbody');
     if(!thead || !tbody) return;
 
-    const sortState = { index: defaultIndex || 0, dir: -1 };
+    const sortState = { index: (defaultIndex ?? 0), dir: -1 };
     const tiebreakOnP = !!opts?.tiebreakOnP;
     const mode = opts?.mode || '';
     const idx = opts?.idx || {};
-
     const cmpLocale = (a,b) => (a||'').localeCompare(b||'', 'sv');
 
     function getCellText(row, i){
@@ -1687,13 +1135,11 @@ h1{
           if(mode === 'team') return cmpTeamByP(a,b,dir);
           if(mode === 'player') return cmpPlayerByP(a,b,dir);
         }
-
         const av = getCellText(a, i);
         const bv = getCellText(b, i);
 
         const an = Number(av.replace(',', '.'));
         const bn = Number(bv.replace(',', '.'));
-
         const aIsNum = !isNaN(an);
         const bIsNum = !isNaN(bn);
 
@@ -1717,14 +1163,14 @@ h1{
   }
 
   function enableStatTableSorting(){
-    const lagTable = document.querySelector('#lagStatsBlock table');
+    const lagTable = document.getElementById('lagStatsTable');
     makeTableSortable(lagTable, 7, {
       tiebreakOnP: true,
       mode: 'team',
       idx: { SM:1, PV:2, SV:3, PM:6, P:7 }
     });
 
-    const playerTable = document.querySelector('#playerStatsBlock table');
+    const playerTable = document.getElementById('playerStatsTable');
     makeTableSortable(playerTable, 12, {
       tiebreakOnP: true,
       mode: 'player',
@@ -1761,8 +1207,8 @@ h1{
 
   async function renderPublicStats(){
     const state = await loadState();
-    renderLagStats(state);
-    renderPlayerStats(state);
+    renderLagStatsMirror(state);
+    renderPlayerStatsMirror(state);
     enableStatTableSorting();
   }
 
@@ -1775,7 +1221,7 @@ h1{
     await renderPublicStats();
     setPublicStatsTab('lag');
   })();
-  
+
 })();
 </script>
 </body>
